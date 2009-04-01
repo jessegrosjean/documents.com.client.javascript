@@ -3,7 +3,6 @@ package com.hogbaysoftware.documents.client.views;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Label;
-import com.google.gwt.user.client.ui.ScrollPanel;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.hogbaysoftware.documents.client.views.windowcontent.WindowContentView;
 
