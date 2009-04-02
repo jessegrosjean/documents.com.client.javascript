@@ -32,7 +32,7 @@ public class ConflictsWindowContentView extends WindowContentView {
 		
 		conflictsList.clear();
 		
-		RequestBuilder builder = new RequestBuilder(RequestBuilder.GET, Documents.formatServiceURL("documents/conflicts"));
+		RequestBuilder builder = new RequestBuilder(RequestBuilder.GET, "/v1/documents/conflicts");
 
 		try {
 			return builder.sendRequest(null, new RequestCallback() {

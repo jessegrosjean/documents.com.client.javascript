@@ -52,10 +52,15 @@ public class Document {
 	}
 
 	public String getDisplayName() {
+		String displayName = name;
+
 		if (name == null || name.length() == 0) {
-			return "Untitled";
+			displayName = "Untitled";
 		}
-		return name;
+		
+		displayName = "◆ " + displayName;
+		
+		return displayName;
 	}
 
 	public String getContent() {

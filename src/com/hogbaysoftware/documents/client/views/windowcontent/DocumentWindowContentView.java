@@ -94,10 +94,10 @@ public class DocumentWindowContentView extends WindowContentView implements Docu
 		if (document.getContent() != null) jsonDocument.put("content", new JSONString(document.getContent()));
 
 		if (document.existsOnServer()) {
-			builder = new RequestBuilder(RequestBuilder.POST, Documents.formatServiceURL("documents/" + document.getID()));
+			builder = new RequestBuilder(RequestBuilder.POST, "/v1/documents/" + document.getID());
 			builder.setHeader("X-HTTP-Method-Override", "PUT");
 		} else {
-			builder = new RequestBuilder(RequestBuilder.POST, Documents.formatServiceURL("documents/"));
+			builder = new RequestBuilder(RequestBuilder.POST, "/v1/documents/");
 		}
 
 		try {
@@ -109,6 +109,7 @@ public class DocumentWindowContentView extends WindowContentView implements Docu
 					if (200 == response.getStatusCode() || 201 == response.getStatusCode()) {
 						try {
 							JSONObject jsonResponse = JSONParser.parse(response.getText()).isObject();
+							document.setID(jsonResponse.get("id").isString().stringValue());
 							document.setVersion((int) jsonResponse.get("version").isNumber().doubleValue());
 
 							if (jsonResponse.get("name") != null) {
@@ -145,7 +146,7 @@ public class DocumentWindowContentView extends WindowContentView implements Docu
 		if (!Window.confirm("Are you sure that you want to delete this document? This action cannot be undone.")) return null;
 
 		Documents.beginProgress("Deleting document...");
-		RequestBuilder builder = new RequestBuilder(RequestBuilder.POST, Documents.formatServiceURL("documents/" + document.getID() + "?version=" + document.getVersion()));
+		RequestBuilder builder = new RequestBuilder(RequestBuilder.POST, "/v1/documents/" + document.getID() + "?version=" + document.getVersion());
 		builder.setHeader("X-HTTP-Method-Override", "DELETE");
 
 		try {
@@ -187,7 +188,7 @@ public class DocumentWindowContentView extends WindowContentView implements Docu
 
 		Documents.beginProgress("Loading document...");
 
-		RequestBuilder builder = new RequestBuilder(RequestBuilder.GET, Documents.formatServiceURL("documents/" + document.getID()));
+		RequestBuilder builder = new RequestBuilder(RequestBuilder.GET, "/v1/documents/" + document.getID());
 
 		try {
 			return builder.sendRequest(null, new RequestCallback() {

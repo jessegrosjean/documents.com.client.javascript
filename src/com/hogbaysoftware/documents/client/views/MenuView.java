@@ -54,7 +54,7 @@ public class MenuView extends Composite implements ClickListener {
 		mainPanel.add(rightMenu);
 		mainPanel.setCellHorizontalAlignment(rightMenu, HasHorizontalAlignment.ALIGN_RIGHT);
 		
-		disableMenuItem(saveItem);
+		//disableMenuItem(saveItem);
 	}
 	
 	public void disableMenuItem(Label menuItem) {

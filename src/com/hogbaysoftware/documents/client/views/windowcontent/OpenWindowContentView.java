@@ -34,7 +34,7 @@ public class OpenWindowContentView extends WindowContentView {
 		
 		documentsList.clear();
 
-		RequestBuilder builder = new RequestBuilder(RequestBuilder.GET, Documents.formatServiceURL("documents"));
+		RequestBuilder builder = new RequestBuilder(RequestBuilder.GET, "/v1/documents");
 		builder.setHeader("Content-Type", "application/json");
 		
 		try {
@@ -58,7 +58,7 @@ public class OpenWindowContentView extends WindowContentView {
 									documentsList.add(new Hyperlink(document.getName(), document.getID()));
 								}
 							} else {
-								documentsList.add(new Label("Your account doesn't have any saved documents."));
+								documentsList.add(new Label("Your account has no documents."));
 								documentsList.add(new Hyperlink("New Document", "new"));
 							}
 							Documents.endProgressWithAlert(null);

@@ -1,10 +1,9 @@
-<?xml version="1.0" encoding="utf-8" ?>
+<?xml version="1.0" encoding="UTF-8"?>
 <classpath>
-   <classpathentry kind="src" path="src"/>
-   <classpathentry kind="src" path="test"/>
-   <classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
-   <classpathentry kind="lib" path="/Users/jesse/Desktop/stage/gwt-mac-1.5.3/gwt-user.jar"/>
-   <classpathentry kind="var" path="JUNIT_HOME/junit.jar"/>
-   <classpathentry kind="output" path="bin"/>
-
+	<classpathentry kind="src" path="src"/>
+	<classpathentry kind="src" path="test"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
+	<classpathentry kind="lib" path="/Users/jesse/Desktop/stage/gwt-mac-1.5.3/gwt-user.jar"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.junit.JUNIT_CONTAINER/4"/>
+	<classpathentry kind="output" path="bin"/>
 </classpath>
