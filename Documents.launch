@@ -15,7 +15,7 @@
 </listAttribute>
 <booleanAttribute key="org.eclipse.jdt.launching.DEFAULT_CLASSPATH" value="false"/>
 <stringAttribute key="org.eclipse.jdt.launching.MAIN_TYPE" value="com.google.gwt.dev.GWTShell"/>
-<stringAttribute key="org.eclipse.jdt.launching.PROGRAM_ARGUMENTS" value="-port 8098 -noserver -out ../Documents.com/www documents/"/>
+<stringAttribute key="org.eclipse.jdt.launching.PROGRAM_ARGUMENTS" value="-port 8098 -noserver -out ../Documents.com/www -style PRETTY documents/"/>
 <stringAttribute key="org.eclipse.jdt.launching.PROJECT_ATTR" value="Documents"/>
 <stringAttribute key="org.eclipse.jdt.launching.VM_ARGUMENTS" value="-XstartOnFirstThread -Xmx256M"/>
 </launchConfiguration>

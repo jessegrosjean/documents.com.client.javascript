@@ -1,6 +1,5 @@
 package com.hogbaysoftware.documents.client.model;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 
 public class Document {
@@ -9,8 +8,8 @@ public class Document {
 	private String id;
 	private int version = -1;
 	private String name;
-	private String content;
-	private ArrayList<DocumentListener> documentListeners;
+	private String content = "";
+	private boolean hasEdits;
 
 	public static Document getDocumentForID(String id) {
 		Document document = idsToDocuments.get(id);
@@ -38,7 +37,6 @@ public class Document {
 		if (this.version != version) {
 			this.version = version;
 			this.content = null;
-			changed();
 		}
 	}
 
@@ -48,7 +46,6 @@ public class Document {
 
 	public void setName(String name) {
 		this.name = name;
-		changed();
 	}
 
 	public String getDisplayName() {
@@ -57,9 +54,7 @@ public class Document {
 		if (name == null || name.length() == 0) {
 			displayName = "Untitled";
 		}
-		
-		displayName = "◆ " + displayName;
-		
+				
 		return displayName;
 	}
 
@@ -69,31 +64,18 @@ public class Document {
 
 	public void setContent(String content) {
 		this.content = content;
-		changed();
 	}
 
 	public boolean existsOnServer() {
 		return id != null;
 	}
-
-	private void changed() {
-		if (documentListeners != null) {
-			for (DocumentListener each : documentListeners) {
-				each.onChanged(this);
-			}
-		}
+	
+	public boolean hasEdits() {
+		return hasEdits;
 	}
 	
-	public void addDocumentListener(DocumentListener listener) {
-		if (documentListeners == null) {
-			documentListeners = new ArrayList<DocumentListener>();
-		}
-		documentListeners.add(listener);
+	public void setHasEdits(boolean hasEdits) {
+		this.hasEdits = hasEdits;
 	}
 
-	public void removeDocumentListener(DocumentListener listener) {
-		if (documentListeners != null) {
-			documentListeners.remove(listener);
-		}
-	}
 }

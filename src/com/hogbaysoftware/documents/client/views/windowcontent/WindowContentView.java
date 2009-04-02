@@ -4,52 +4,66 @@ import com.google.gwt.http.client.Request;
 import com.google.gwt.user.client.ui.Composite;
 
 public class WindowContentView extends Composite {
-	private Request refreshRequest;
-		
-	public void newAction() {
+	private Request refreshFromServerRequest;
+	
+/*	public void newAction() {
+		Documents.getSharedInstance().newAction();
 	}
 
 	public void openAction() {
+		Documents.getSharedInstance().openAction();
 	}
-
-	public void openAction(String documentID) {
+	
+	public void openDocument(Document document) {
 	}
 	
 	public Request saveAction() {
-		return null;
+		return Documents.getSharedInstance().saveAction();
 	}
 
 	public Request deleteAction() {
-		return null;
+		return Documents.getSharedInstance().deleteAction();
 	}
 
 	public void renameAction() {
+		Documents.getSharedInstance().renameAction();
 	}
 
-	public void showSharing() {
+	public void showSharing(Document document) {
+		Documents.getSharedInstance().showSharing(document);
 	}
 	
-	public void showHistory() {
+	public void showHistory(Document document) {
+		Documents.getSharedInstance().showHistory(document);
 	}
 	
 	public void showConflicts() {
+		Documents.getSharedInstance().showConflicts();
 	}
 	
 	public void showHelp() {
+		Documents.getSharedInstance().showHelp();
+	}*/
+	
+	public boolean hasEdits() {
+		return false;
+	}	
+	
+	public void commitEdits() {
 	}
 	
 	public void viewDidShow() {
-		refreshRequest = refresh();
+		refreshFromServerRequest = refreshFromServer();
 	}
 	
 	public void viewDidHide() {
-		if (refreshRequest != null) {
-			refreshRequest.cancel();
+		if (refreshFromServerRequest != null) {
+			refreshFromServerRequest.cancel();
 		}
-		refreshRequest = null;
+		refreshFromServerRequest = null;
 	}
-	
-	public Request refresh() {
+		
+	public Request refreshFromServer() {
 		return null;
 	}
 }

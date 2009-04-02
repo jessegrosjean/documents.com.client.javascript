@@ -18,10 +18,10 @@ public class HelpWindowContentView extends WindowContentView {
 
 	public void viewDidShow() {
 		super.viewDidShow();
-		Documents.getSharedInstance().setWindowTitle("Help");
+		Documents.getSharedInstance().setWindowTitle("Help", null);
 	}
 
-	public Request refresh() {
+	public Request refreshFromServer() {
 		Documents.beginProgress("Loading help...");
 		
 		String url = GWT.getModuleBaseURL() + "help.html";

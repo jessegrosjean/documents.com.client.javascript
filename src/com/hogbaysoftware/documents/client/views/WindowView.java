@@ -1,17 +1,20 @@
 package com.hogbaysoftware.documents.client.views;
 
+import com.google.gwt.user.client.ui.ClickListener;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.VerticalPanel;
+import com.hogbaysoftware.documents.client.Documents;
+import com.hogbaysoftware.documents.client.model.Document;
 import com.hogbaysoftware.documents.client.views.windowcontent.WindowContentView;
 
 public class WindowView extends Composite {
 	private VerticalPanel windowPanel = new VerticalPanel();
 	private HorizontalPanel titleBarPanel = new HorizontalPanel();
 	private Label titleLabel = new Label();
+	private ClickListener titleClickListener;
 	private VerticalPanel windowContentFrame = new VerticalPanel();
-//	private ScrollPanel windowContentScrollPanel = new ScrollPanel();
 	private WindowContentView windowContentView;
 	
 	public WindowView() {
@@ -31,17 +34,30 @@ public class WindowView extends Composite {
 		windowPanel.add(windowContentFrame);
 		windowPanel.setCellHeight(windowContentFrame, "100%");
 		windowPanel.setCellWidth(windowContentFrame, "100%");
-
-//		windowContentFrame.add(windowContentScrollPanel);
-//		windowContentFrame.setCellWidth(windowContentView, "100%");
-//		windowContentFrame.setCellHeight(windowContentView, "100%");
 	}
 		
 	public WindowContentView getWindowContentView() {
 		return windowContentView;
 	}
 
-	public void setWindowTitle(String title) {
+	public void setWindowTitle(String title, ClickListener clickLister) {
+		Document document = Documents.getSharedInstance().getDocument();
+		if (document != null && document.hasEdits()) {
+			title = "◆ " + title;
+		}
+		
+		if (clickLister != titleClickListener) {
+			if (titleClickListener != null) {
+				titleLabel.removeClickListener(titleClickListener);
+				titleLabel.removeStyleName("menuItem");
+			}
+			titleClickListener = clickLister;
+			if (titleClickListener != null) {
+				titleLabel.addClickListener(titleClickListener);
+				titleLabel.addStyleName("menuItem");
+			}
+		}
+		
 		titleLabel.setText(title);
 	}
 	

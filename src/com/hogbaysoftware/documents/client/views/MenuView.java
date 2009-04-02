@@ -1,5 +1,6 @@
 package com.hogbaysoftware.documents.client.views;
 
+import com.google.gwt.user.client.History;
 import com.google.gwt.user.client.ui.ClickListener;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.HasHorizontalAlignment;
@@ -7,12 +8,12 @@ import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.Widget;
 import com.hogbaysoftware.documents.client.Documents;
+import com.hogbaysoftware.documents.client.model.Document;
 
 public class MenuView extends Composite implements ClickListener {
 	public Label newItem = MenuView.createMenuItem("New", this);
 	public Label openItem = MenuView.createMenuItem("Open", this);
 	public Label saveItem = MenuView.createMenuItem("Save", this);
-	public Label renameItem = MenuView.createMenuItem("Rename", this);
 	public Label deleteItem = MenuView.createMenuItem("Delete", this);
 	public Label shareItem = MenuView.createMenuItem("Share", this);
 	public Label historyItem = MenuView.createMenuItem("History", this);
@@ -38,11 +39,12 @@ public class MenuView extends Composite implements ClickListener {
 		
 		leftMenu.add(newItem);
 		leftMenu.add(openItem);
+//		leftMenu.add(documentsItem);
 		leftMenu.add(saveItem);
-		leftMenu.add(renameItem);
+		leftMenu.add(deleteItem);
+	//	leftMenu.add(renameItem);
 //		leftMenu.add(shareItem);
 		leftMenu.add(historyItem);
-		leftMenu.add(deleteItem);
 		leftMenu.add(conflictsItem);
 		leftMenu.add(helpItem);
 
@@ -53,42 +55,45 @@ public class MenuView extends Composite implements ClickListener {
 		mainPanel.add(leftMenu);
 		mainPanel.add(rightMenu);
 		mainPanel.setCellHorizontalAlignment(rightMenu, HasHorizontalAlignment.ALIGN_RIGHT);
-		
-		//disableMenuItem(saveItem);
 	}
 	
-	public void disableMenuItem(Label menuItem) {
-		menuItem.addStyleName("disabled");
-	}
+	public void validateMenuItems() {
+		saveItem.removeStyleName("disabled");
+		deleteItem.removeStyleName("disabled");
+		shareItem.removeStyleName("disabled");
+		historyItem.removeStyleName("disabled");
 
-	public void enableMenuItem(Label menuItem) {
-		menuItem.removeStyleName("disabled");
+		Document document = Documents.getSharedInstance().getDocument();
+		if (document == null) {
+			saveItem.addStyleName("disabled");
+			deleteItem.addStyleName("disabled");
+			shareItem.addStyleName("disabled");
+			historyItem.addStyleName("disabled");
+		}
 	}
-
+	
 	public void onClick(Widget sender) {
 		if (sender.getStyleName().contains("disabled")) return;
 
-		signOutItem.setTitle("jesse@hogbaysoftware.com");
-		rightMenu.add(signOutItem);
-
+		Documents documents = Documents.getSharedInstance();
+		Document document = documents.getDocument();
+		
 		if (sender == newItem) {
-			Documents.getSharedInstance().newAction();
+			History.newItem("new");
 		} else if (sender == openItem) {
-			Documents.getSharedInstance().openAction();
+			History.newItem("open");
 		} else if (sender == saveItem) {
-			Documents.getSharedInstance().saveAction();
-		} else if (sender == renameItem) {
-			Documents.getSharedInstance().renameAction();
+			documents.saveAction();
 		} else if (sender == deleteItem) {
-			Documents.getSharedInstance().deleteAction();
+			documents.deleteAction();
 		} else if (sender == shareItem) {
-			Documents.getSharedInstance().showSharing();
+			History.newItem(document.getID() + "/sharing");
 		} else if (sender == historyItem) {
-			Documents.getSharedInstance().showHistory();
+			History.newItem(document.getID() + "/history");
 		} else if (sender == conflictsItem) {
-			Documents.getSharedInstance().showConflicts();
+			History.newItem("conflicts");
 		} else if (sender == helpItem) {
-			Documents.getSharedInstance().showHelp();
+			History.newItem("help");
 		}
 	}
 }

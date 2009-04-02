@@ -26,10 +26,10 @@ public class OpenWindowContentView extends WindowContentView {
 
 	public void viewDidShow() {
 		super.viewDidShow();
-		Documents.getSharedInstance().setWindowTitle("Open...");
+		Documents.getSharedInstance().setWindowTitle("Open...", null);
 	}
 
-	public Request refresh() {
+	public Request refreshFromServer() {
 		Documents.beginProgress("Loading documents...");
 		
 		documentsList.clear();
@@ -59,7 +59,7 @@ public class OpenWindowContentView extends WindowContentView {
 								}
 							} else {
 								documentsList.add(new Label("Your account has no documents."));
-								documentsList.add(new Hyperlink("New Document", "new"));
+//								documentsList.add(new Hyperlink("New Document", "new"));
 							}
 							Documents.endProgressWithAlert(null);
 						} catch (JSONException e) {

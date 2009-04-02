@@ -6,12 +6,11 @@ import com.google.gwt.http.client.RequestCallback;
 import com.google.gwt.http.client.RequestException;
 import com.google.gwt.http.client.Response;
 import com.google.gwt.json.client.JSONArray;
-import com.google.gwt.json.client.JSONObject;
 import com.google.gwt.json.client.JSONParser;
-import com.google.gwt.user.client.ui.Hyperlink;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.hogbaysoftware.documents.client.Documents;
+import com.hogbaysoftware.documents.client.views.ConflictView;
 
 public class ConflictsWindowContentView extends WindowContentView {
 	private VerticalPanel conflictsViewPanel = new VerticalPanel();
@@ -24,10 +23,10 @@ public class ConflictsWindowContentView extends WindowContentView {
 	
 	public void viewDidShow() {
 		super.viewDidShow();
-		Documents.getSharedInstance().setWindowTitle("Conflicts");
+		Documents.getSharedInstance().setWindowTitle("Conflicts", null);
 	}
 
-	public Request refresh() {
+	public Request refreshFromServer() {
 		Documents.beginProgress("Loading conflicts...");
 		
 		conflictsList.clear();
@@ -47,13 +46,7 @@ public class ConflictsWindowContentView extends WindowContentView {
 
 						if (size > 0) {
 							for (int i = 0; i < size; i++) {
-								JSONObject jsonConflict = jsonConflicts.get(i).isObject();
-								String documentID = jsonConflict.get("id").isString().stringValue();
-								String documentName = jsonConflict.get("name").isString().stringValue();
-								//String editVersion = jsonConflict.get("version").isString().stringValue();
-								//String editDate = jsonConflict.get("created").isString().stringValue();
-								//String conflicts = jsonConflict.get("conflicts").isString().stringValue();
-								conflictsList.add(new Hyperlink(documentName, documentID));
+								conflictsList.add(new ConflictView(jsonConflicts.get(i).isObject()));
 							}
 						} else {
 							conflictsList.add(new Label("Your account has no conflicts."));
