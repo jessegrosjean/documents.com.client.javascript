@@ -1,14 +1,10 @@
 package com.hogbaysoftware.documents.client.views.windowcontent;
 
+import java.util.ArrayList;
+
 import com.google.gwt.http.client.Request;
-import com.google.gwt.http.client.RequestBuilder;
 import com.google.gwt.http.client.RequestCallback;
-import com.google.gwt.http.client.RequestException;
 import com.google.gwt.http.client.Response;
-import com.google.gwt.json.client.JSONArray;
-import com.google.gwt.json.client.JSONException;
-import com.google.gwt.json.client.JSONObject;
-import com.google.gwt.json.client.JSONParser;
 import com.google.gwt.user.client.ui.Hyperlink;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.VerticalPanel;
@@ -26,11 +22,31 @@ public class OpenWindowContentView extends WindowContentView {
 
 	public void viewDidShow() {
 		super.viewDidShow();
-		Documents.getSharedInstance().setWindowTitle("Open...", null);
+		//Documents.getSharedInstance().setWindowTitle("Open...", null);
+		Documents.getSharedInstance().getWindowView().setWindowTitlePath("Open...", "open");
 	}
 
 	public Request refreshFromServer() {
-		Documents.beginProgress("Loading documents...");
+		documentsList.clear();
+
+		Document.refreshDocumentsFromServer(new RequestCallback() {
+			public void onError(Request request, Throwable exception) {
+			}
+			
+			public void onResponseReceived(Request request, Response response) {
+				ArrayList<Document> documents = Document.getDocuments();
+				if (documents.size() == 0) {
+					documentsList.add(new Label("Your account has no documents."));
+				} else {
+					for (Document each : documents) {
+						documentsList.add(new Hyperlink(each.getName(), each.getID()));
+					}
+				}
+			}
+		});
+		
+		return null;
+/*		Documents.beginProgress("Loading documents...");
 		
 		documentsList.clear();
 
@@ -52,7 +68,7 @@ public class OpenWindowContentView extends WindowContentView {
 							if (size > 0) {
 								for (int i = 0; i < size; i++) {
 									JSONObject jsonDocument = jsonDocuments.get(i).isObject();
-									Document document = Document.getDocumentForID(jsonDocument.get("id").isString().stringValue());
+									Document document = Document.getDocumentForID(jsonDocument.get("id").isString().stringValue(), true);
 									document.setVersion((int)jsonDocument.get("version").isNumber().doubleValue());
 									document.setName(jsonDocument.get("name").isString().stringValue());
 									documentsList.add(new Hyperlink(document.getName(), document.getID()));
@@ -74,6 +90,6 @@ public class OpenWindowContentView extends WindowContentView {
 			Documents.endProgressWithAlert("Couldn't load documents\n\n" + e);
 		}
 
-		return null;
+		return null;*/
 	}
 }

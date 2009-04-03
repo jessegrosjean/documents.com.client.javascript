@@ -23,7 +23,7 @@ public class ConflictView extends Composite {
 		
 		DiffMatchPatch dmp = new DiffMatchPatch();
 		
-		mainPanel.add(new HTML("Document " + "<strong>\"" + conflict.get("name").isString().stringValue() + "\"</strong>" + " (" + (int) conflict.get("version").isNumber().doubleValue() + ") on " + conflict.get("created").isString().stringValue().split(" ")[0]));
+		mainPanel.add(new HTML("" + "<strong>\"" + conflict.get("name").isString().stringValue() + "\"</strong>" + " (version " + (int) conflict.get("version").isNumber().doubleValue() + ") on " + conflict.get("created").isString().stringValue().split(" ")[0]));
 				
 		//mainPanel.add(new HTML("<strong>Date:</strong> " + conflict.get("created").isString().stringValue().split(" ")[0]));
 		

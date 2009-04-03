@@ -18,7 +18,7 @@ public class HelpWindowContentView extends WindowContentView {
 
 	public void viewDidShow() {
 		super.viewDidShow();
-		Documents.getSharedInstance().setWindowTitle("Help", null);
+		Documents.getSharedInstance().getWindowView().setWindowTitlePath("Help", "help");
 	}
 
 	public Request refreshFromServer() {

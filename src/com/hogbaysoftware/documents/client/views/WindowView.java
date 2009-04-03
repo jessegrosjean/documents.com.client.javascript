@@ -1,7 +1,12 @@
 package com.hogbaysoftware.documents.client.views;
 
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
+
 import com.google.gwt.user.client.ui.ClickListener;
 import com.google.gwt.user.client.ui.Composite;
+import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.VerticalPanel;
@@ -12,8 +17,10 @@ import com.hogbaysoftware.documents.client.views.windowcontent.WindowContentView
 public class WindowView extends Composite {
 	private VerticalPanel windowPanel = new VerticalPanel();
 	private HorizontalPanel titleBarPanel = new HorizontalPanel();
-	private Label titleLabel = new Label();
-	private ClickListener titleClickListener;
+	private HorizontalPanel titlePanel = new HorizontalPanel();
+	
+	//private Label titleLabel = new Label();
+	//private ClickListener titleClickListener;
 	private VerticalPanel windowContentFrame = new VerticalPanel();
 	private WindowContentView windowContentView;
 	
@@ -22,10 +29,10 @@ public class WindowView extends Composite {
 		
 		windowPanel.addStyleName("window");
 		titleBarPanel.addStyleName("window-title-bar");
-		titleLabel.addStyleName("window-title");
+		titlePanel.addStyleName("window-title");
 
-		titleBarPanel.add(titleLabel);
-		titleBarPanel.setCellHorizontalAlignment(titleLabel, HorizontalPanel.ALIGN_CENTER);
+		titleBarPanel.add(titlePanel);
+		titleBarPanel.setCellHorizontalAlignment(titlePanel, HorizontalPanel.ALIGN_CENTER);
 		
 		windowPanel.add(titleBarPanel);
 		windowPanel.setCellHeight(titleBarPanel, "0");
@@ -39,7 +46,7 @@ public class WindowView extends Composite {
 	public WindowContentView getWindowContentView() {
 		return windowContentView;
 	}
-
+/*
 	public void setWindowTitle(String title, ClickListener clickLister) {
 		Document document = Documents.getSharedInstance().getDocument();
 		if (document != null && document.hasEdits()) {
@@ -59,6 +66,70 @@ public class WindowView extends Composite {
 		}
 		
 		titleLabel.setText(title);
+	}
+*/
+	public void setWindowTitlePath(String pathComponent, Object pathAction) {
+		ArrayList<String> pathComponents = new ArrayList<String>();
+		ArrayList<Object> pathActions = new ArrayList<Object>();
+		pathComponents.add(pathComponent);
+		pathActions.add(pathAction);
+		setWindowTitlePath(pathComponents, pathActions);
+	}
+
+	public void setWindowTitlePath(String pathComponent1, Object pathAction1, String pathComponent2, Object pathAction2) {
+		ArrayList<String> pathComponents = new ArrayList<String>();
+		ArrayList<Object> pathActions = new ArrayList<Object>();
+		pathComponents.add(pathComponent1);
+		pathActions.add(pathAction1);
+		pathComponents.add(pathComponent2);
+		pathActions.add(pathAction2);
+		setWindowTitlePath(pathComponents, pathActions);
+	}
+
+	public void setWindowTitlePath(String pathComponent1, Object pathAction1, String pathComponent2, Object pathAction2, String pathComponent3, Object pathAction3) {
+		ArrayList<String> pathComponents = new ArrayList<String>();
+		ArrayList<Object> pathActions = new ArrayList<Object>();
+		pathComponents.add(pathComponent1);
+		pathActions.add(pathAction1);
+		pathComponents.add(pathComponent2);
+		pathActions.add(pathAction2);
+		pathComponents.add(pathComponent3);
+		pathActions.add(pathAction3);
+		setWindowTitlePath(pathComponents, pathActions);
+	}
+
+	public void setWindowTitlePath(List<String> pathComponents, List<Object> pathActions) {
+		titlePanel.clear();
+		
+		Iterator<String> i1 = pathComponents.iterator();
+		Iterator<Object> i2 = pathActions.iterator();
+		boolean first = true;
+		
+		while (i1.hasNext()) {
+			String pathComponent = i1.next();
+			Object pathAction = i2.next();
+			
+			if (first) {
+				Document document = Documents.getSharedInstance().getDocument();
+				if (document != null && document.hasEdits()) {
+					pathComponent = "◆ " + pathComponent;
+				}				
+				first = false;
+			}
+			
+			if (pathAction instanceof ClickListener) {
+				titlePanel.add(new MenuItemView(pathComponent, (ClickListener)pathAction));
+			} else if (pathAction instanceof String) {
+				titlePanel.add(new MenuItemView(pathComponent, (String)pathAction));
+			} else {
+				titlePanel.add(new Label(pathComponent));
+			}
+			
+			if (i1.hasNext()) {
+				titlePanel.add(new HTML("&nbsp;>&nbsp;"));
+			}
+		}
+		
 	}
 	
 	public void setWindowContentView(WindowContentView aWindowContentView) {

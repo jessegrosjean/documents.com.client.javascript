@@ -23,7 +23,7 @@ public class ConflictsWindowContentView extends WindowContentView {
 	
 	public void viewDidShow() {
 		super.viewDidShow();
-		Documents.getSharedInstance().setWindowTitle("Conflicts", null);
+		Documents.getSharedInstance().getWindowView().setWindowTitlePath("Conflicts", "conflicts");
 	}
 
 	public Request refreshFromServer() {
@@ -49,7 +49,7 @@ public class ConflictsWindowContentView extends WindowContentView {
 								conflictsList.add(new ConflictView(jsonConflicts.get(i).isObject()));
 							}
 						} else {
-							conflictsList.add(new Label("Your account has no conflicts."));
+							conflictsList.add(new Label("Your account has no unresloved sync conflicts."));
 						}
 						Documents.endProgressWithAlert(null);
 					} else {

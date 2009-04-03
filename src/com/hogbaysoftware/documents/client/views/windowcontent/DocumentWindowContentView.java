@@ -59,7 +59,7 @@ public class DocumentWindowContentView extends WindowContentView implements Chan
 		if (!document.hasEdits()) {
 			if (hasEdits()) {
 				document.setHasEdits(true);
-				Documents.getSharedInstance().setWindowTitle(document.getDisplayName(), this);
+				refreshWindowTitlePath();
 			}
 		}
 	}
@@ -70,7 +70,7 @@ public class DocumentWindowContentView extends WindowContentView implements Chan
 		if (name != null) {
 			document.setName(name);
 			document.setHasEdits(true);
-			Documents.getSharedInstance().setWindowTitle(document.getDisplayName(), this);
+			refreshWindowTitlePath();
 		}
 	}
 
@@ -88,14 +88,19 @@ public class DocumentWindowContentView extends WindowContentView implements Chan
 		document.setContent(textArea.getText());
 		if (!document.hasEdits()) {
 			document.setHasEdits(true);
-			Documents.getSharedInstance().setWindowTitle(document.getDisplayName(), this);
+			refreshWindowTitlePath();
 		}
 	}
 
+	public void refreshWindowTitlePath() {
+		Documents documents = Documents.getSharedInstance();
+		documents.getWindowView().setWindowTitlePath(documents.getDocument().getDisplayName(), this);
+	}
+	
 	public void refreshFromModel() {
 		Document document = Documents.getSharedInstance().getDocument();
 		if (isAttached()) {
-			Documents.getSharedInstance().setWindowTitle(document.getDisplayName(), this);
+			refreshWindowTitlePath();
 		}
 		textArea.setText(document.getContent());
 		textArea.setFocus(true);		
@@ -103,7 +108,7 @@ public class DocumentWindowContentView extends WindowContentView implements Chan
 	
 	public Request refreshFromServer() {
 		Document document = Documents.getSharedInstance().getDocument();
-		if (document.getID() == null || document.getContent() != null) {
+		if (!document.existsOnServer()) {
 			return null;
 		}
 
@@ -121,7 +126,7 @@ public class DocumentWindowContentView extends WindowContentView implements Chan
 					if (200 == response.getStatusCode()) {
 						try {
 							JSONObject jsonDocument = JSONParser.parse(response.getText()).isObject();
-							Document document = Document.getDocumentForID(jsonDocument.get("id").isString().stringValue());
+							Document document = Document.getDocumentForID(jsonDocument.get("id").isString().stringValue(), true);
 							document.setVersion((int) jsonDocument.get("version").isNumber().doubleValue());
 							document.setName(jsonDocument.get("name").isString().stringValue());
 							document.setContent(jsonDocument.get("content").isString().stringValue());

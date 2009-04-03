@@ -24,11 +24,15 @@ public class DocumentsHistory implements HistoryListener {
 			documents.showHelp();
 		} else {
 			if (historyTokens.length == 1) {
-				documents.openDocument(Document.getDocumentForID(historyTokens[0]));
-			} else if (historyTokens[1].equalsIgnoreCase("history")) {
-				documents.showHistory(Document.getDocumentForID(historyTokens[0]));
+				documents.openDocument(Document.getDocumentForID(historyTokens[0], false));
+			} else if (historyTokens[1].equalsIgnoreCase("revisions")) {
+				if (historyTokens.length == 3) {
+					documents.showRevision(Document.getDocumentForID(historyTokens[0], false), historyTokens[2]);
+				} else {
+					documents.showRevisions(Document.getDocumentForID(historyTokens[0], false));
+				}
 			} else if (historyTokens[1].equalsIgnoreCase("sharing")) {
-				documents.showSharing(Document.getDocumentForID(historyTokens[0]));
+				documents.showSharing(Document.getDocumentForID(historyTokens[0], false));
 			}
 		}
 	}
