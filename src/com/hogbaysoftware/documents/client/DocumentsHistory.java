@@ -20,8 +20,6 @@ public class DocumentsHistory implements HistoryListener {
 			documents.openAction();
 		} else if (historyTokens[0].equalsIgnoreCase("conflicts")) {
 			documents.showConflicts();
-		} else if (historyTokens[0].equalsIgnoreCase("help")) {
-			documents.showHelp();
 		} else {
 			if (historyTokens.length == 1) {
 				documents.openDocument(Document.getDocumentForID(historyTokens[0], false));

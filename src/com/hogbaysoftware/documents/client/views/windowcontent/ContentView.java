@@ -2,10 +2,15 @@ package com.hogbaysoftware.documents.client.views.windowcontent;
 
 import com.google.gwt.http.client.Request;
 import com.google.gwt.user.client.ui.Composite;
+import com.google.gwt.user.client.ui.HasVerticalAlignment;
+import com.google.gwt.user.client.ui.VerticalPanel;
+import com.google.gwt.user.client.ui.Widget;
 
-public class WindowContentView extends Composite {
+public class ContentView extends Composite {
 	private Request refreshFromServerRequest;
 	
+	public ContentView() {
+	}
 /*	public void newAction() {
 		Documents.getSharedInstance().newAction();
 	}
@@ -44,6 +49,14 @@ public class WindowContentView extends Composite {
 	public void showHelp() {
 		Documents.getSharedInstance().showHelp();
 	}*/
+	
+	public void spaceLastWidgetInPanel(VerticalPanel panel) {
+		if (panel.getWidgetCount() > 0) {
+			Widget w = panel.getWidget(panel.getWidgetCount() - 1);
+			panel.setCellHeight(w, "100%");
+			panel.setCellVerticalAlignment(w, HasVerticalAlignment.ALIGN_TOP);
+		}
+	}
 	
 	public boolean hasEdits() {
 		return false;

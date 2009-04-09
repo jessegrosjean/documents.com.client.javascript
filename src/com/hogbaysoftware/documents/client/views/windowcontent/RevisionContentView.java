@@ -8,18 +8,20 @@ import com.google.gwt.http.client.Response;
 import com.google.gwt.json.client.JSONException;
 import com.google.gwt.json.client.JSONObject;
 import com.google.gwt.json.client.JSONParser;
+import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.TextArea;
+import com.google.gwt.user.client.ui.VerticalPanel;
 import com.hogbaysoftware.documents.client.Documents;
 import com.hogbaysoftware.documents.client.model.Document;
 
-public class RevisionWindowContentView extends WindowContentView {
-	//private FlowPanel revisionViewPanel = new FlowPanel();
-	private TextArea textArea = new TextArea();
+public class RevisionContentView extends ContentView {
+	private VerticalPanel revisionAttributes = new VerticalPanel();
+	
 	private String revision;
 	
-	public RevisionWindowContentView() {
-		initWidget(textArea);
-		textArea.setReadOnly(true);
+	public RevisionContentView() {
+		//revisionPanel.add(revisionAttributes);
+		initWidget(revisionAttributes);
 	}
 	
 	public void setRevision(String revision) {
@@ -30,22 +32,29 @@ public class RevisionWindowContentView extends WindowContentView {
 	public void viewDidShow() {
 		super.viewDidShow();
 		Document document = Documents.getSharedInstance().getDocument();
-		Documents.getSharedInstance().getWindowView().setWindowTitlePath(document.getDisplayName(), document.getID(), "Revisions", document.getID() + "/revisions", revision, document.getID() + "/revisions/" + revision);
-		//Documents.getSharedInstance().setWindowTitle(Documents.getSharedInstance().getDocument().getDisplayName() + " > Revisions > " + revision, null);
+		Documents.getSharedInstance().getTitleView().setWindowTitlePath(document.getDisplayName(), document.getID(), "Revisions", document.getID() + "/revisions");
 	}
 	
 	public void refreshFromJSONRevision(JSONObject jsonRevision) {
-		//revisionViewPanel.clear();
-		//revisionViewPanel.add(new HTML("<pre>" + jsonRevision.get("content").isString().stringValue() + "</pre>"));
-		textArea.setText(jsonRevision.get("content").isString().stringValue());
-//		document.setVersion((int) jsonDocument.get("version").isNumber().doubleValue());
-	//	document.setName(jsonDocument.get("name").isString().stringValue());
-//		document.setContent(jsonDocument.get("content").isString().stringValue());
+		revisionAttributes.clear();
 
+		revisionAttributes.add(new HTML("<em>Revision:</em> " + revision));
+		revisionAttributes.add(new HTML("<em>Name:</em> " + jsonRevision.get("name").isString().stringValue()));
+		revisionAttributes.add(new HTML("<em>Date:</em> " + jsonRevision.get("created").isString().stringValue().split("\\.")[0]));
+		revisionAttributes.add(new HTML("<hr />"));
+		
+		TextArea contentTextArea = new TextArea();
+		contentTextArea.setText(jsonRevision.get("content").isString().stringValue());
+		contentTextArea.setReadOnly(true);		
+		contentTextArea.addStyleName("content");
+		
+		revisionAttributes.add(contentTextArea);
+		revisionAttributes.setCellWidth(contentTextArea, "100%");
+		revisionAttributes.setCellHeight(contentTextArea, "100%");
 	}
 	
 	public Request refreshFromServer() {
-		textArea.setText("");
+		revisionAttributes.clear();
 		
 		final Document document = Documents.getSharedInstance().getDocument();
 		if (!document.existsOnServer()) {

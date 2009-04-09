@@ -17,10 +17,10 @@ import com.google.gwt.user.client.ui.Widget;
 import com.hogbaysoftware.documents.client.Documents;
 import com.hogbaysoftware.documents.client.model.Document;
 
-public class DocumentWindowContentView extends WindowContentView implements ChangeListener, ClickListener, KeyboardListener {
+public class DocumentContentView extends ContentView implements ChangeListener, ClickListener, KeyboardListener {
 	private TextArea textArea = new TextArea();
 
-	public DocumentWindowContentView() {
+	public DocumentContentView() {
 		initWidget(textArea);
 		textArea.addChangeListener(this);
 		textArea.addKeyboardListener(this);
@@ -55,18 +55,12 @@ public class DocumentWindowContentView extends WindowContentView implements Chan
 	}
 
 	public void onKeyUp(Widget sender, char keyCode, int modifiers) {
-		Document document = Documents.getSharedInstance().getDocument();
-		if (!document.hasEdits()) {
-			if (hasEdits()) {
-				document.setHasEdits(true);
-				refreshWindowTitlePath();
-			}
-		}
+		commitEdits();
 	}
 	
 	public void onClick(Widget sender) {
 		Document document = Documents.getSharedInstance().getDocument();
-		String name = Window.prompt("Name", document.getDisplayName());
+		String name = Window.prompt("Rename Document:", document.getDisplayName());
 		if (name != null) {
 			document.setName(name);
 			document.setHasEdits(true);
@@ -85,8 +79,10 @@ public class DocumentWindowContentView extends WindowContentView implements Chan
 	
 	public void commitEdits() {
 		Document document = Documents.getSharedInstance().getDocument();
-		document.setContent(textArea.getText());
-		if (!document.hasEdits()) {
+		String displayName = document.getDisplayName();
+		boolean changedContent = document.setContent(textArea.getText());
+		
+		if (!document.getDisplayName().equals(displayName) || (changedContent && !document.hasEdits())) {
 			document.setHasEdits(true);
 			refreshWindowTitlePath();
 		}
@@ -94,7 +90,7 @@ public class DocumentWindowContentView extends WindowContentView implements Chan
 
 	public void refreshWindowTitlePath() {
 		Documents documents = Documents.getSharedInstance();
-		documents.getWindowView().setWindowTitlePath(documents.getDocument().getDisplayName(), this);
+		documents.getTitleView().setWindowTitlePath(documents.getDocument().getDisplayName(), this);
 	}
 	
 	public void refreshFromModel() {

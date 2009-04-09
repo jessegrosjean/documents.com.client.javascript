@@ -9,65 +9,21 @@ import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Label;
-import com.google.gwt.user.client.ui.VerticalPanel;
 import com.hogbaysoftware.documents.client.Documents;
 import com.hogbaysoftware.documents.client.model.Document;
-import com.hogbaysoftware.documents.client.views.windowcontent.WindowContentView;
 
-public class WindowView extends Composite {
-	private VerticalPanel windowPanel = new VerticalPanel();
+public class TitleView extends Composite {
 	private HorizontalPanel titleBarPanel = new HorizontalPanel();
 	private HorizontalPanel titlePanel = new HorizontalPanel();
 	
-	//private Label titleLabel = new Label();
-	//private ClickListener titleClickListener;
-	private VerticalPanel windowContentFrame = new VerticalPanel();
-	private WindowContentView windowContentView;
-	
-	public WindowView() {
-		initWidget(windowPanel);
-		
-		windowPanel.addStyleName("window");
-		titleBarPanel.addStyleName("window-title-bar");
-		titlePanel.addStyleName("window-title");
-
+	public TitleView() {
+		initWidget(titleBarPanel);
+		titleBarPanel.addStyleName("title-bar");
+		titlePanel.addStyleName("title");
 		titleBarPanel.add(titlePanel);
 		titleBarPanel.setCellHorizontalAlignment(titlePanel, HorizontalPanel.ALIGN_CENTER);
-		
-		windowPanel.add(titleBarPanel);
-		windowPanel.setCellHeight(titleBarPanel, "0");
-
-		windowContentFrame.addStyleName("window-content-frame");
-		windowPanel.add(windowContentFrame);
-		windowPanel.setCellHeight(windowContentFrame, "100%");
-		windowPanel.setCellWidth(windowContentFrame, "100%");
 	}
-		
-	public WindowContentView getWindowContentView() {
-		return windowContentView;
-	}
-/*
-	public void setWindowTitle(String title, ClickListener clickLister) {
-		Document document = Documents.getSharedInstance().getDocument();
-		if (document != null && document.hasEdits()) {
-			title = "◆ " + title;
-		}
-		
-		if (clickLister != titleClickListener) {
-			if (titleClickListener != null) {
-				titleLabel.removeClickListener(titleClickListener);
-				titleLabel.removeStyleName("menuItem");
-			}
-			titleClickListener = clickLister;
-			if (titleClickListener != null) {
-				titleLabel.addClickListener(titleClickListener);
-				titleLabel.addStyleName("menuItem");
-			}
-		}
-		
-		titleLabel.setText(title);
-	}
-*/
+	
 	public void setWindowTitlePath(String pathComponent, Object pathAction) {
 		ArrayList<String> pathComponents = new ArrayList<String>();
 		ArrayList<Object> pathActions = new ArrayList<Object>();
@@ -104,11 +60,10 @@ public class WindowView extends Composite {
 		Iterator<String> i1 = pathComponents.iterator();
 		Iterator<Object> i2 = pathActions.iterator();
 		boolean first = true;
-		
+				
 		while (i1.hasNext()) {
 			String pathComponent = i1.next();
 			Object pathAction = i2.next();
-			
 			if (first) {
 				Document document = Documents.getSharedInstance().getDocument();
 				if (document != null && document.hasEdits()) {
@@ -129,22 +84,5 @@ public class WindowView extends Composite {
 				titlePanel.add(new HTML("&nbsp;>&nbsp;"));
 			}
 		}
-		
-	}
-	
-	public void setWindowContentView(WindowContentView aWindowContentView) {
-		if (windowContentView != null) {
-			windowContentView.removeStyleName("window-content");
-			windowContentFrame.remove(windowContentView);
-			windowContentView.viewDidHide();
-		}
-		windowContentView = aWindowContentView;
-		if (windowContentView != null) {
-			windowContentView.addStyleName("window-content");
-			windowContentFrame.add(windowContentView);
-			windowContentFrame.setCellWidth(windowContentView, "100%");
-			windowContentFrame.setCellHeight(windowContentView, "100%");
-			windowContentView.viewDidShow();
-		}
-	}
+	}	
 }

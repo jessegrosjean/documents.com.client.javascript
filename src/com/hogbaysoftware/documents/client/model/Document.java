@@ -94,7 +94,13 @@ public class Document {
 	}
 
 	public void setID(String id) {
+		if (this.id != null) {
+			idsToDocuments.remove(this.id);
+		}
 		this.id = id;
+		if (this.id != null) {
+			idsToDocuments.put(this.id, this);
+		}
 	}
 
 	public int getVersion() {
@@ -120,7 +126,18 @@ public class Document {
 		String displayName = name;
 
 		if (name == null || name.length() == 0) {
-			displayName = "Untitled";
+			if (content != null) {
+				int index = Math.min(content.indexOf("\n"), 32);
+				if (index > 0) {
+					displayName = content.substring(0, index);
+				} else {
+					displayName = content.substring(0, Math.min(content.length(), 32));
+				}
+				
+				if (displayName.length() == 0) {
+					displayName = "Untitled";
+				}
+			}
 		}
 				
 		return displayName;
@@ -130,8 +147,10 @@ public class Document {
 		return content;
 	}
 
-	public void setContent(String content) {
+	public boolean setContent(String content) {
+		if (this.content != null && content != null && this.content.equals(content)) return false;
 		this.content = content;
+		return true;
 	}
 
 	public boolean existsOnServer() {

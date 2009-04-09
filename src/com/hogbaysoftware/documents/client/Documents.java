@@ -1,6 +1,8 @@
 package com.hogbaysoftware.documents.client;
 
 
+import java.util.ArrayList;
+
 import com.google.gwt.core.client.EntryPoint;
 import com.google.gwt.http.client.Request;
 import com.google.gwt.http.client.RequestBuilder;
@@ -12,58 +14,72 @@ import com.google.gwt.json.client.JSONNumber;
 import com.google.gwt.json.client.JSONObject;
 import com.google.gwt.json.client.JSONParser;
 import com.google.gwt.json.client.JSONString;
+import com.google.gwt.user.client.DOM;
+import com.google.gwt.user.client.Event;
+import com.google.gwt.user.client.EventPreview;
 import com.google.gwt.user.client.History;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.WindowResizeListener;
 import com.google.gwt.user.client.ui.RootPanel;
 import com.hogbaysoftware.documents.client.model.Document;
+import com.hogbaysoftware.documents.client.views.ContentContainerView;
 import com.hogbaysoftware.documents.client.views.MenuView;
-import com.hogbaysoftware.documents.client.views.WindowView;
-import com.hogbaysoftware.documents.client.views.windowcontent.ConflictsWindowContentView;
-import com.hogbaysoftware.documents.client.views.windowcontent.DocumentWindowContentView;
-import com.hogbaysoftware.documents.client.views.windowcontent.HelpWindowContentView;
-import com.hogbaysoftware.documents.client.views.windowcontent.OpenWindowContentView;
-import com.hogbaysoftware.documents.client.views.windowcontent.RevisionWindowContentView;
-import com.hogbaysoftware.documents.client.views.windowcontent.RevisionsWindowContentView;
-import com.hogbaysoftware.documents.client.views.windowcontent.WindowContentView;
+import com.hogbaysoftware.documents.client.views.TitleView;
+import com.hogbaysoftware.documents.client.views.windowcontent.ConflictsContentView;
+import com.hogbaysoftware.documents.client.views.windowcontent.ContentView;
+import com.hogbaysoftware.documents.client.views.windowcontent.DocumentContentView;
+import com.hogbaysoftware.documents.client.views.windowcontent.OpenContentView;
+import com.hogbaysoftware.documents.client.views.windowcontent.RevisionContentView;
+import com.hogbaysoftware.documents.client.views.windowcontent.RevisionsContentView;
 
-public class Documents implements EntryPoint, WindowResizeListener {
+public class Documents implements EntryPoint, EventPreview, WindowResizeListener {
 	public static Documents sharedInstance;
-	
+	private static ArrayList<String> progressMessageStack = new ArrayList<String>();
+
 	private Document document;
 	private MenuView menuView = new MenuView();
-	private WindowView windowView = new WindowView();
-	private OpenWindowContentView documentsView = new OpenWindowContentView();
-	private DocumentWindowContentView documentView = new DocumentWindowContentView();
-	private RevisionsWindowContentView revisionsView = new RevisionsWindowContentView();
-	private RevisionWindowContentView revisionView = new RevisionWindowContentView();
-	private ConflictsWindowContentView conflictsView = new ConflictsWindowContentView();
-	private HelpWindowContentView helpView = new HelpWindowContentView();
+	private TitleView titleView = new TitleView();
+	private ContentContainerView contentContainerView = new ContentContainerView();
+	private OpenContentView documentsView = new OpenContentView();
+	private DocumentContentView documentView = new DocumentContentView();
+	private RevisionsContentView revisionsView = new RevisionsContentView();
+	private RevisionContentView revisionView = new RevisionContentView();
+	private ConflictsContentView conflictsView = new ConflictsContentView();
 
 	public static Documents getSharedInstance() {
 		return sharedInstance;
 	}
-	
-	public void onModuleLoad() {
-		sharedInstance = this;
 
-		windowView.setWindowTitlePath("Loading...", null);
-		
+	public void onModuleLoad() {
+		sharedInstance = this;	
+
+		titleView.setWindowTitlePath("Loading...", null);
+
+		RootPanel.get("desktop").getElement().setInnerHTML("");		
 		RootPanel.get("desktop").add(menuView);
-		RootPanel.get("desktop").add(windowView);
-		
-		Window.addWindowResizeListener(Documents.this);
+		RootPanel.get("desktop").add(titleView);
+		RootPanel.get("desktop").add(contentContainerView);
+
+		Window.addWindowResizeListener(this);
+		Window.enableScrolling(false);
+		Documents.registerForOnBeforeUnload(this);
+		DOM.addEventPreview(this);
+
 		onWindowResized(Window.getClientWidth(), Window.getClientHeight());
 
 		Document.refreshDocumentsFromServer(new RequestCallback() {
 			public void onError(Request request, Throwable exception) {
 			}
-			
+
 			public void onResponseReceived(Request request, Response response) {
 				new DocumentsHistory();
-				
+
 				if (History.getToken().equalsIgnoreCase("")) {
-					History.newItem("new");
+					if (Document.getDocuments().size() == 0) {
+						History.newItem("new");
+					} else {
+						History.newItem("open");
+					}
 				} else {
 					History.fireCurrentHistoryState();
 				}
@@ -71,46 +87,76 @@ public class Documents implements EntryPoint, WindowResizeListener {
 		});
 	}
 
-	public void onWindowResized(int width, int height) {
-		windowView.setHeight((height - windowView.getAbsoluteTop()) + "px");
+	public boolean onEventPreview(Event event) {
+		char keyCode = (char) DOM.eventGetKeyCode(event);
+		boolean ctrl = DOM.eventGetCtrlKey(event);
+		boolean meta = DOM.eventGetMetaKey(event);
+		int type = DOM.eventGetType(event);
+		boolean shortcut = (ctrl || meta) && type == Event.ONKEYDOWN;
+
+		if (shortcut) {
+			if  (getWindowContentView() == documentView && keyCode == 'S') {  // 83 is 's'
+				saveAction();
+				return false;
+			} else if  (keyCode == 'O') {  // 79 is 'o'
+				History.newItem("open");
+				return false;
+			}
+		}
+
+		return true;
 	}
-	
+
+	public void onWindowResized(int width, int height) {
+		contentContainerView.setHeight((height - (contentContainerView.getAbsoluteTop())) + "px");
+	}
+
 	//
 	// Actions
 	//
 
+	public String shouldCancelNavigationConfirmMessage() {
+		return "Your document has unsaved changes. If you leave this page without saving you will lose those changes.";
+	}
+
 	public boolean shouldCancelNavigation() {
-		WindowContentView currentWindowContentView = getWindowContentView();
-		
+		return shouldCancelNavigation(false);
+	}
+
+	public boolean shouldCancelNavigation(boolean displayConfirm) {
+		ContentView currentWindowContentView = getWindowContentView();
+
 		if (document != null && document.hasEdits() || currentWindowContentView != null && currentWindowContentView.hasEdits()) {
-			if (!Window.confirm("Your document has unsaved changes. Are you sure that you want to continue and lose those changes?")) {
-				return false;
+			if (displayConfirm) {
+				if (!Window.confirm("Are you sure you want to leave this page?\n\n" + shouldCancelNavigationConfirmMessage() + "\n\nClick OK to continue, or Cancel to stay on this page.")) {
+					return true;
+				} else {
+					return false;
+				}
 			}
 			currentWindowContentView.commitEdits();
 			return true;
 		}
-		return true;
+		return false;
 	}
-	
+
 	public void newAction() {
-		if (!shouldCancelNavigation()) return;
+		if (shouldCancelNavigation(true)) return;
 		Document document = Document.getDocumentForID("new", true);
 		document.setContent("");
 		document.setName(null);
 		document.setHasEdits(false);
 		openDocument(document);
-		//History.newItem(historyToken)
-		//setWindowContentView(documentView);
 	}
 
 	public void openAction() {
-		if (!shouldCancelNavigation()) return;
+		if (shouldCancelNavigation(true)) return;
 		setDocument(null);
 		setWindowContentView(documentsView);			
 	}
 
 	public void openDocument(Document document) {
-		if (!shouldCancelNavigation()) return;
+		if (shouldCancelNavigation(true)) return;
 		setDocument(document);
 		setWindowContentView(documentView);							
 	}
@@ -124,15 +170,12 @@ public class Documents implements EntryPoint, WindowResizeListener {
 			jsonDocument.put("id", new JSONString(document.getID()));
 			jsonDocument.put("version", new JSONNumber(document.getVersion()));
 		} else if (document.getName() == null) {
-			String name = Window.prompt("Save Document As:", document.getDisplayName());
-			if (name != null) {
-				document.setName(name);
-			} else {
-				return null;
-			}
+			document.setName(document.getDisplayName());
 		}
 
 		Documents.beginProgress("Saving document...");
+
+		getWindowContentView().commitEdits();
 
 		if (document.getName() != null) jsonDocument.put("name", new JSONString(document.getName()));
 		if (document.getContent() != null) jsonDocument.put("content", new JSONString(document.getContent()));
@@ -159,7 +202,7 @@ public class Documents implements EntryPoint, WindowResizeListener {
 							if (jsonResponse.get("id") != null) {
 								document.setID(jsonResponse.get("id").isString().stringValue());
 							}
-							
+
 							if (jsonResponse.get("name") != null) {
 								document.setName(jsonResponse.get("name").isString().stringValue());
 							}
@@ -169,7 +212,7 @@ public class Documents implements EntryPoint, WindowResizeListener {
 							}
 
 							document.setHasEdits(false);
-							
+
 							Documents.endProgressWithAlert(null);
 
 							if (!initialExistsOnServer) {
@@ -178,10 +221,10 @@ public class Documents implements EntryPoint, WindowResizeListener {
 								documentView.refreshFromModel();
 							}
 
-							if (jsonResponse.get("failed_patches") != null) {
-								//Window.confirm();
-								//@SuppressWarnings("unused")
-								//String message = "Some of your most recent changes conflict with changes just made by a collaborator, and have been discarded. This should only affect recent changes. Please note the discarded changes here, and then go back and edit the document again, adding back the changes that are still appropriate.";
+							if (jsonResponse.get("conflicts") != null) {
+								if (Window.confirm("Some of your edits conflict with recent changes made on TaskPaper.com. To resolve those conflicts now click the OK button.")) {
+									History.newItem("conflicts");
+								}
 							}
 						} catch (JSONException e) {
 							Documents.endProgressWithAlert("Couldn't parse document\n\n" + e);
@@ -205,7 +248,7 @@ public class Documents implements EntryPoint, WindowResizeListener {
 			History.newItem("open");
 			return null;
 		}
-		
+
 		Documents.beginProgress("Deleting document...");
 		RequestBuilder builder = new RequestBuilder(RequestBuilder.POST, "/v1/documents/" + document.getID() + "?version=" + document.getVersion());
 		builder.setHeader("X-HTTP-Method-Override", "DELETE");
@@ -230,91 +273,104 @@ public class Documents implements EntryPoint, WindowResizeListener {
 		}
 		return null;
 	}
-	
+
 	public void showSharing(Document document) {
-		if (!shouldCancelNavigation()) return;
+		if (shouldCancelNavigation(true)) return;
 		setDocument(document);
 	}
-	
+
 	public void showRevisions(Document document) {
-		if (!shouldCancelNavigation()) return;
+		if (shouldCancelNavigation(true)) return;
 		setDocument(document);
 		setWindowContentView(revisionsView);							
 	}
 
 	public void showRevision(Document document, String revision) {
-		if (!shouldCancelNavigation()) return;
+		if (shouldCancelNavigation(true)) return;
 		setDocument(document);
 		revisionView.setRevision(revision);
 		setWindowContentView(revisionView);							
 	}
 
 	public void showConflicts() {
-		if (!shouldCancelNavigation()) return;
+		if (shouldCancelNavigation(true)) return;
 		setDocument(null);
 		setWindowContentView(conflictsView);			
 	}
-	
-	public void showHelp() {
-		if (!shouldCancelNavigation()) return;
-		setDocument(null);
-		setWindowContentView(helpView);			
-	}
-	
+
 	public void goHome() {
-		if (!shouldCancelNavigation()) return;
 		Window.Location.assign("/");
 	}
-	
+
 	public void signOut() {
-		if (!shouldCancelNavigation()) return;
-		
+		if (shouldCancelNavigation(true)) return;
+		Window.Location.assign(DOM.getElementById("logout_url").getAttribute("content"));
 	}
-	
+
 	//
 	// Document
 	//
-	
+
 	public Document getDocument() {
 		return document;
 	}
-	
+
 	public void setDocument(Document document) {
 		this.document = document;
 	}
-	
+
 	//
 	// Status
 	//
-	
+
 	public static void beginProgress(String progressMessage) {
 		if (progressMessage == null) progressMessage = "";
-		getSharedInstance().menuView.beginProgress();
+		progressMessageStack.add(progressMessage);
 		Window.setStatus(progressMessage);
+		if (progressMessageStack.size() == 1) {
+			getSharedInstance().menuView.beginProgress();
+			DOM.setStyleAttribute(RootPanel.getBodyElement(), "cursor", "progress");
+		}
 	}
-	
+
 	public static void endProgressWithAlert(String alert) {
-		Documents.getSharedInstance().menuView.endProgress();
-		Window.setStatus("");
+		progressMessageStack.remove(progressMessageStack.size() - 1);
+		if (progressMessageStack.size() == 0) {
+			Documents.getSharedInstance().menuView.endProgress();
+			DOM.setStyleAttribute(RootPanel.getBodyElement(), "cursor", "");			
+			Window.setStatus("");
+		} else {
+			Window.setStatus(progressMessageStack.get(progressMessageStack.size() - 1));
+		}
 		if (alert != null) {
 			Window.alert(alert);
 		}
 	}
-		
+
 	//
 	// Window
 	//
-	
-	public WindowView getWindowView() {
-		return windowView;
+
+	public TitleView getTitleView() {
+		return titleView;
 	}
-	
-	public WindowContentView getWindowContentView() {
-		return windowView.getWindowContentView();
+
+	public ContentView getWindowContentView() {
+		return contentContainerView.getWindowContentView();
 	}
-	
-	public void setWindowContentView(WindowContentView aWindowContentView) {
-		windowView.setWindowContentView(aWindowContentView);
+
+	public void setWindowContentView(ContentView aWindowContentView) {
+		contentContainerView.setWindowContentView(aWindowContentView);
 		menuView.validateMenuItems();
 	}
+
+	private native static String registerForOnBeforeUnload(Documents documents) /*-{
+		$wnd.onbeforeunload = function() {
+			var shouldCancelNavigation = documents.@com.hogbaysoftware.documents.client.Documents::shouldCancelNavigation()();
+			if (shouldCancelNavigation == true) {
+				return documents.@com.hogbaysoftware.documents.client.Documents::shouldCancelNavigationConfirmMessage()();
+			}
+		};
+	}-*/;
+
 }

@@ -7,23 +7,27 @@ import com.google.gwt.http.client.RequestException;
 import com.google.gwt.http.client.Response;
 import com.google.gwt.json.client.JSONArray;
 import com.google.gwt.json.client.JSONParser;
+import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.Label;
+import com.google.gwt.user.client.ui.ScrollPanel;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.hogbaysoftware.documents.client.Documents;
 import com.hogbaysoftware.documents.client.views.ConflictView;
 
-public class ConflictsWindowContentView extends WindowContentView {
-	private VerticalPanel conflictsViewPanel = new VerticalPanel();
+public class ConflictsContentView extends ContentView {
+	private ScrollPanel scrollPanel = new ScrollPanel();
 	private VerticalPanel conflictsList = new VerticalPanel();
 
-	public ConflictsWindowContentView() {
-		conflictsViewPanel.add(conflictsList);
-		initWidget(conflictsViewPanel);
+	public ConflictsContentView() {
+		initWidget(scrollPanel);
+		conflictsList.setWidth("100%");
+		conflictsList.addStyleName("scrolled-content");
+		scrollPanel.add(conflictsList);		
 	}
 	
 	public void viewDidShow() {
 		super.viewDidShow();
-		Documents.getSharedInstance().getWindowView().setWindowTitlePath("Conflicts", "conflicts");
+		Documents.getSharedInstance().getTitleView().setWindowTitlePath("Conflicts", "conflicts");
 	}
 
 	public Request refreshFromServer() {
@@ -45,12 +49,20 @@ public class ConflictsWindowContentView extends WindowContentView {
 						int size = jsonConflicts.size();
 
 						if (size > 0) {
+							conflictsList.add(new HTML("<strong>Your account has sync conflicts.</strong>"));
+							conflictsList.add(new HTML("<ul><li>Green marks text that you added, but that could not be saved.</li><li>Red marks text that you removed, but that could not be deleted.</li><li>Review each conflict, and then mark it as resolved to remove it from this list.</li></ul>"));
+							
 							for (int i = 0; i < size; i++) {
-								conflictsList.add(new ConflictView(jsonConflicts.get(i).isObject()));
+								ConflictView conflictView = new ConflictView(jsonConflicts.get(i).isObject());
+								conflictView.setWidth("100%");
+								conflictsList.add(conflictView);
 							}
 						} else {
-							conflictsList.add(new Label("Your account has no unresloved sync conflicts."));
+							conflictsList.add(new Label("Your account has no sync conflicts."));
 						}
+
+						spaceLastWidgetInPanel(conflictsList);
+
 						Documents.endProgressWithAlert(null);
 					} else {
 						Documents.endProgressWithAlert("Couldn't load conflicts (" + response.getStatusText() + ")");

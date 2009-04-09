@@ -1,52 +1,85 @@
 package com.hogbaysoftware.documents.client.views;
 
-import java.util.Date;
-
 import com.google.gwt.core.client.JsArray;
+import com.google.gwt.http.client.Request;
+import com.google.gwt.http.client.RequestBuilder;
+import com.google.gwt.http.client.RequestCallback;
+import com.google.gwt.http.client.RequestException;
+import com.google.gwt.http.client.Response;
+import com.google.gwt.json.client.JSONBoolean;
 import com.google.gwt.json.client.JSONObject;
+import com.google.gwt.user.client.History;
+import com.google.gwt.user.client.ui.ClickListener;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.HTML;
+import com.google.gwt.user.client.ui.HasHorizontalAlignment;
+import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.VerticalPanel;
+import com.google.gwt.user.client.ui.Widget;
+import com.hogbaysoftware.documents.client.Documents;
 import com.hogbaysoftware.documents.client.model.DiffMatchPatch;
 import com.hogbaysoftware.documents.client.model.Patch;
 
-public class ConflictView extends Composite {
+public class ConflictView extends Composite implements ClickListener {
 	private VerticalPanel mainPanel = new VerticalPanel();
 	private JSONObject conflict;
 	
 	public ConflictView(JSONObject aConflict) {
 		initWidget(mainPanel);
 		
-		addStyleName("conflict");
+		mainPanel.addStyleName("conflict-view");
 		
 		conflict = aConflict;
+		String id = conflict.get("id").isString().stringValue();
+		String name = conflict.get("name").isString().stringValue();
+		String revision = Integer.toString((int)conflict.get("version").isNumber().doubleValue());
 		
 		DiffMatchPatch dmp = new DiffMatchPatch();
 		
-		mainPanel.add(new HTML("" + "<strong>\"" + conflict.get("name").isString().stringValue() + "\"</strong>" + " (version " + (int) conflict.get("version").isNumber().doubleValue() + ") on " + conflict.get("created").isString().stringValue().split(" ")[0]));
-				
-		//mainPanel.add(new HTML("<strong>Date:</strong> " + conflict.get("created").isString().stringValue().split(" ")[0]));
+		HorizontalPanel panel = new HorizontalPanel();
+		panel.add(new HTML("<em>Document:</em> <a href=\"#" + id + "\">" + name + "</a>"));
 		
+		Widget markAsResolved = new MenuItemView("Mark As Resolved", this);
+		panel.add(markAsResolved);
+		panel.setCellHorizontalAlignment(markAsResolved, HasHorizontalAlignment.ALIGN_RIGHT);
+		panel.setWidth("100%");
+		
+		mainPanel.add(panel);
+		mainPanel.setCellWidth(panel, "100%");
+		
+		mainPanel.add(new HTML("<em>Revision:</em> <a href=\"#" + id + "/revisions/" + revision + "\">" + revision + "</a>"));
 		
 		JsArray<Patch> failedPatches = dmp.patch_fromText(conflict.get("conflicts").isString().stringValue());
 		for (int i = 0; i < failedPatches.length(); i++) {
-			mainPanel.add(new HTML("<div>" + dmp.diff_prettyHtml(failedPatches.get(i).getDiffs()) + "</div>"));
+			mainPanel.add(new HTML("<div class=\"conflict-diffs\">" + dmp.diff_prettyHtml(failedPatches.get(i).getDiffs()) + "</div>"));
 		}
-		
-/*		
-		int length = failedPatches.length();
-		String failedPatchesAsText = dmp.patch_toText(failedPatches);
-		
-		String htmlPatches = dmp.diff_prettyHtml(failedPatches);
-		mainPanel.add(new HTML(htmlPatches));
-	*/	
-		//mainPanel.add(new Label(jsonConflict.get("name").isString().stringValue()));
-		//String documentID = jsonConflict.get("id").isString().stringValue();
-		//String documentName = jsonConflict.get("name").isString().stringValue();
-		//String editVersion = jsonConflict.get("version").isString().stringValue();
-		//String editDate = jsonConflict.get("created").isString().stringValue();
-		//String conflicts = jsonConflict.get("conflicts").isString().stringValue();
 	}
-	
-	
+
+	public void onClick(Widget sender) {
+		Documents.beginProgress("Resolving conflict...");
+
+		JSONObject jsonDocument = new JSONObject();
+		jsonDocument.put("conflicts_resolved", JSONBoolean.getInstance(true));
+		RequestBuilder builder = new RequestBuilder(RequestBuilder.POST, "/v1/documents/" + conflict.get("id").isString().stringValue() + "/edits/" + (int) conflict.get("version").isNumber().doubleValue());
+		builder.setHeader("X-HTTP-Method-Override", "PUT");
+
+		try {
+			builder.sendRequest(jsonDocument.toString(), new RequestCallback() {
+				public void onError(Request request, Throwable e) {
+					Documents.endProgressWithAlert("Couldn't resolve conflict\n\n" + e);
+				}
+
+				public void onResponseReceived(Request request, Response response) {
+					if (200 == response.getStatusCode()) {
+						Documents.endProgressWithAlert(null);
+						History.fireCurrentHistoryState();
+					} else {
+						Documents.endProgressWithAlert("Couldn't resolve conflict (" + response.getStatusText() + ")");
+					}
+				}
+			});
+		} catch (RequestException e) {
+			Documents.endProgressWithAlert("Couldn't resolve conflict\n\n" + e);
+		}
+	}
 }
