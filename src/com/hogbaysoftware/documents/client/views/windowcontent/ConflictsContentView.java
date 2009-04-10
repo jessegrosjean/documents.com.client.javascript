@@ -34,6 +34,7 @@ public class ConflictsContentView extends ContentView {
 		Documents.beginProgress("Loading conflicts...");
 		
 		conflictsList.clear();
+		conflictsList.add(new Label("Loading..."));
 		
 		RequestBuilder builder = new RequestBuilder(RequestBuilder.GET, "/v1/documents/conflicts");
 
@@ -44,12 +45,14 @@ public class ConflictsContentView extends ContentView {
 				}
 
 				public void onResponseReceived(Request request, Response response) {
+					conflictsList.clear();
+					
 					if (200 == response.getStatusCode()) {
 						JSONArray jsonConflicts = JSONParser.parse(response.getText()).isArray();
 						int size = jsonConflicts.size();
 
 						if (size > 0) {
-							conflictsList.add(new HTML("<strong>Your account has sync conflicts.</strong>"));
+							conflictsList.add(new HTML("<p><strong>Your account has sync conflicts.</strong></p>"));
 							conflictsList.add(new HTML("<ul><li>Green marks text that you added, but that could not be saved.</li><li>Red marks text that you removed, but that could not be deleted.</li><li>Review each conflict, and then mark it as resolved to remove it from this list.</li></ul>"));
 							
 							for (int i = 0; i < size; i++) {

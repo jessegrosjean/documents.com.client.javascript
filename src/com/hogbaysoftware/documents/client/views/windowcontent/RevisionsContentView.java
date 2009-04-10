@@ -1,21 +1,20 @@
 package com.hogbaysoftware.documents.client.views.windowcontent;
 
 import com.google.gwt.http.client.Request;
-import com.google.gwt.user.client.ui.FlowPanel;
-import com.google.gwt.user.client.ui.Hyperlink;
-import com.google.gwt.user.client.ui.Label;
+import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.ScrollPanel;
 import com.hogbaysoftware.documents.client.Documents;
 import com.hogbaysoftware.documents.client.model.Document;
 
 public class RevisionsContentView extends ContentView {
 	private ScrollPanel scrollPanel = new ScrollPanel();
-	private FlowPanel revisionsViewPanel = new FlowPanel();
+	private HTML linksHTML = new HTML();
 	
 	public RevisionsContentView() {
 		initWidget(scrollPanel);
-		revisionsViewPanel.addStyleName("scrolled-content");
-		scrollPanel.add(revisionsViewPanel);
+		linksHTML.addStyleName("scrolled-content");
+		linksHTML.addStyleName("revisionLinks");
+		scrollPanel.add(linksHTML);
 	}
 		
 	@Override
@@ -26,28 +25,28 @@ public class RevisionsContentView extends ContentView {
 	}
 	
 	public Request refreshFromServer() {
-		revisionsViewPanel.clear();
+		linksHTML.setHTML("");
 		
 		Document document = Documents.getSharedInstance().getDocument();
 		int version = document.getVersion();
 		
 		if (version == -1) {
-			revisionsViewPanel.add(new Label("This document has no saved versions."));
+			linksHTML.setHTML("This document has not been saved yet.");
 			return null;
 		}
 		
-		String baseHistoryToken = document.getID() + "/revisions/";
-		Hyperlink revisionLink;
+		String baseHistoryToken = "#" + document.getID() + "/revisions/";
+		StringBuffer links = new StringBuffer();
 		
 		for (int i = 0; i <= version; i++) {
 			if (i == version) {
-				revisionLink = new Hyperlink(version + " (current)", baseHistoryToken + i);
+				links.append("<a href=\"" + baseHistoryToken + i + "\">" + version + " (current)</a>");
 			} else {
-				revisionLink = new Hyperlink(Integer.toString(i), baseHistoryToken + i);
+				links.append("<a href=\"" + baseHistoryToken + i + "\">" + Integer.toString(i) + "</a> ");
 			}
-			revisionLink.addStyleName("revisionLink");
-			revisionsViewPanel.add(revisionLink);
 		}
+
+		linksHTML.setHTML(links.toString());
 
 		return null;
 	}

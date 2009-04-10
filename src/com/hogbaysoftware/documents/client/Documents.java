@@ -4,6 +4,9 @@ package com.hogbaysoftware.documents.client;
 import java.util.ArrayList;
 
 import com.google.gwt.core.client.EntryPoint;
+import com.google.gwt.dom.client.NativeEvent;
+import com.google.gwt.event.logical.shared.ResizeEvent;
+import com.google.gwt.event.logical.shared.ResizeHandler;
 import com.google.gwt.http.client.Request;
 import com.google.gwt.http.client.RequestBuilder;
 import com.google.gwt.http.client.RequestCallback;
@@ -16,10 +19,10 @@ import com.google.gwt.json.client.JSONParser;
 import com.google.gwt.json.client.JSONString;
 import com.google.gwt.user.client.DOM;
 import com.google.gwt.user.client.Event;
-import com.google.gwt.user.client.EventPreview;
 import com.google.gwt.user.client.History;
 import com.google.gwt.user.client.Window;
-import com.google.gwt.user.client.WindowResizeListener;
+import com.google.gwt.user.client.Event.NativePreviewEvent;
+import com.google.gwt.user.client.Event.NativePreviewHandler;
 import com.google.gwt.user.client.ui.RootPanel;
 import com.hogbaysoftware.documents.client.model.Document;
 import com.hogbaysoftware.documents.client.views.ContentContainerView;
@@ -32,7 +35,7 @@ import com.hogbaysoftware.documents.client.views.windowcontent.OpenContentView;
 import com.hogbaysoftware.documents.client.views.windowcontent.RevisionContentView;
 import com.hogbaysoftware.documents.client.views.windowcontent.RevisionsContentView;
 
-public class Documents implements EntryPoint, EventPreview, WindowResizeListener {
+public class Documents implements EntryPoint, NativePreviewHandler, ResizeHandler {
 	public static Documents sharedInstance;
 	private static ArrayList<String> progressMessageStack = new ArrayList<String>();
 
@@ -60,12 +63,12 @@ public class Documents implements EntryPoint, EventPreview, WindowResizeListener
 		RootPanel.get("desktop").add(titleView);
 		RootPanel.get("desktop").add(contentContainerView);
 
-		Window.addWindowResizeListener(this);
+		Window.addResizeHandler(this);
 		Window.enableScrolling(false);
 		Documents.registerForOnBeforeUnload(this);
-		DOM.addEventPreview(this);
+		Event.addNativePreviewHandler(this);
 
-		onWindowResized(Window.getClientWidth(), Window.getClientHeight());
+		//onWindowResized(Window.getClientWidth(), Window.getClientHeight());
 
 		Document.refreshDocumentsFromServer(new RequestCallback() {
 			public void onError(Request request, Throwable exception) {
@@ -87,30 +90,31 @@ public class Documents implements EntryPoint, EventPreview, WindowResizeListener
 		});
 	}
 
-	public boolean onEventPreview(Event event) {
-		char keyCode = (char) DOM.eventGetKeyCode(event);
-		boolean ctrl = DOM.eventGetCtrlKey(event);
-		boolean meta = DOM.eventGetMetaKey(event);
-		int type = DOM.eventGetType(event);
-		boolean shortcut = (ctrl || meta) && type == Event.ONKEYDOWN;
+	public void onPreviewNativeEvent(NativePreviewEvent event) {		
+		int type = event.getTypeInt();
+		if (type == Event.ONKEYDOWN) {
+			NativeEvent nativeEvent = event.getNativeEvent();
+			char keyCode = (char) nativeEvent.getKeyCode();
+			boolean ctrl = nativeEvent.getCtrlKey();
+			boolean meta = nativeEvent.getMetaKey();
+			boolean shortcut = (ctrl || meta);
 
-		if (shortcut) {
-			if  (getWindowContentView() == documentView && keyCode == 'S') {  // 83 is 's'
-				saveAction();
-				return false;
-			} else if  (keyCode == 'O') {  // 79 is 'o'
-				History.newItem("open");
-				return false;
+			if (shortcut) {
+				if  (getWindowContentView() == documentView && keyCode == 'S') {  // 83 is 's'
+					saveAction();
+					event.cancel();
+				} else if  (keyCode == 'O') {  // 79 is 'o'
+					History.newItem("open");
+					event.cancel();
+				}
 			}
 		}
-
-		return true;
 	}
 
-	public void onWindowResized(int width, int height) {
-		contentContainerView.setHeight((height - (contentContainerView.getAbsoluteTop())) + "px");
+	public void onResize(ResizeEvent event) {
+		contentContainerView.setHeight((event.getHeight() - (contentContainerView.getAbsoluteTop())) + "px");
 	}
-
+	
 	//
 	// Actions
 	//
@@ -162,6 +166,10 @@ public class Documents implements EntryPoint, EventPreview, WindowResizeListener
 	}
 
 	public Request saveAction() {
+		if (!document.hasEdits()) {
+			return null;
+		}
+		
 		RequestBuilder builder = null;
 		JSONObject jsonDocument = new JSONObject();
 		final boolean initialExistsOnServer = document.existsOnServer();
@@ -303,7 +311,6 @@ public class Documents implements EntryPoint, EventPreview, WindowResizeListener
 	}
 
 	public void signOut() {
-		if (shouldCancelNavigation(true)) return;
 		Window.Location.assign(DOM.getElementById("logout_url").getAttribute("content"));
 	}
 

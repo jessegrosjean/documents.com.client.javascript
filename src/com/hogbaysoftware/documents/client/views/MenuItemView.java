@@ -1,30 +1,26 @@
 package com.hogbaysoftware.documents.client.views;
 
+import com.google.gwt.event.dom.client.ClickEvent;
+import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.user.client.DOM;
-import com.google.gwt.user.client.Event;
 import com.google.gwt.user.client.History;
-import com.google.gwt.user.client.ui.ClickListener;
-import com.google.gwt.user.client.ui.ClickListenerCollection;
 import com.google.gwt.user.client.ui.HasHTML;
-import com.google.gwt.user.client.ui.SourcesClickEvents;
 import com.google.gwt.user.client.ui.Widget;
 
-public class MenuItemView extends Widget implements HasHTML, SourcesClickEvents {
-	//private Element anchorElem;
-	private ClickListenerCollection clickListeners;
+public class MenuItemView extends Widget implements HasHTML, ClickHandler {
 	private String targetHistoryToken;
 
 	public MenuItemView() {
 		setElement(DOM.createDiv());
-		//DOM.appendChild(getElement(), anchorElem = DOM.createAnchor());
-		sinkEvents(Event.ONCLICK);
 		setStyleName("menuItem");
+		addClickHandler(this);
 	}
 
-	public MenuItemView(String text, ClickListener clickListener) {
+	public MenuItemView(String text, ClickHandler handler) {
 		this();
 		setText(text);
-		addClickListener(clickListener);
+		addClickHandler(handler);
 	}
 
 	public MenuItemView(String text, boolean asHTML, String targetHistoryToken) {
@@ -42,17 +38,13 @@ public class MenuItemView extends Widget implements HasHTML, SourcesClickEvents 
 		setText(text);
 		setTargetHistoryToken(targetHistoryToken);
 	}
-
-	public void addClickListener(ClickListener listener) {
-		if (clickListeners == null) {
-			clickListeners = new ClickListenerCollection();
-		}
-		clickListeners.add(listener);
+	
+	public HandlerRegistration addClickHandler(ClickHandler handler) {
+		return addDomHandler(handler, ClickEvent.getType());
 	}
 
 	public String getHTML() {
 		return DOM.getInnerHTML(getElement());
-		//return DOM.getInnerHTML(anchorElem);
 	}
 
 	public String getTargetHistoryToken() {
@@ -61,54 +53,31 @@ public class MenuItemView extends Widget implements HasHTML, SourcesClickEvents 
 
 	public String getText() {
 		return DOM.getInnerText(getElement());
-		//return DOM.getInnerText(anchorElem);
 	}
 
-	@Override
-	public void onBrowserEvent(Event event) {
+	public void onClick(ClickEvent event) {
 		if (getEnabled()) {
-			if (DOM.eventGetType(event) == Event.ONCLICK) {
-				if (clickListeners != null) {
-					clickListeners.fireClick(this);
+			if (targetHistoryToken != null) {
+				if (History.getToken().equalsIgnoreCase(targetHistoryToken)) {
+					History.fireCurrentHistoryState();
+				} else {
+					History.newItem(targetHistoryToken);
 				}
-				
-				if (targetHistoryToken != null) {
-					if (History.getToken().equalsIgnoreCase(targetHistoryToken)) {
-						History.fireCurrentHistoryState();
-					} else {
-						History.newItem(targetHistoryToken);
-					}
-				}
-				DOM.eventPreventDefault(event);
+				event.preventDefault();
 			}
-		}
-	}
-
-	public void removeClickListener(ClickListener listener) {
-		if (clickListeners != null) {
-			clickListeners.remove(listener);
 		}
 	}
 
 	public void setHTML(String html) {
 		DOM.setInnerHTML(getElement(), html);
-		//DOM.setInnerHTML(anchorElem, html);
 	}
 
 	public void setTargetHistoryToken(String targetHistoryToken) {
 		this.targetHistoryToken = targetHistoryToken;
-		//DOM.setElementProperty(anchorElem, "href", "#" + targetHistoryToken);
 	}
 
 	public void setText(String text) {
 		DOM.setInnerText(getElement(), text);
-		//DOM.setInnerText(anchorElem, text);
-	}
-
-	@Override
-	protected void onEnsureDebugId(String baseID) {
-		//ensureDebugId(anchorElem, "", baseID);
-		ensureDebugId(getElement(), baseID, "wrapper");
 	}
 
 	public boolean getEnabled() {

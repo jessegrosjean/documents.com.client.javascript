@@ -9,6 +9,7 @@ import com.google.gwt.json.client.JSONException;
 import com.google.gwt.json.client.JSONObject;
 import com.google.gwt.json.client.JSONParser;
 import com.google.gwt.user.client.ui.HTML;
+import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.TextArea;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.hogbaysoftware.documents.client.Documents;
@@ -20,7 +21,7 @@ public class RevisionContentView extends ContentView {
 	private String revision;
 	
 	public RevisionContentView() {
-		//revisionPanel.add(revisionAttributes);
+		revisionAttributes.addStyleName("revision");
 		initWidget(revisionAttributes);
 	}
 	
@@ -41,11 +42,10 @@ public class RevisionContentView extends ContentView {
 		revisionAttributes.add(new HTML("<em>Revision:</em> " + revision));
 		revisionAttributes.add(new HTML("<em>Name:</em> " + jsonRevision.get("name").isString().stringValue()));
 		revisionAttributes.add(new HTML("<em>Date:</em> " + jsonRevision.get("created").isString().stringValue().split("\\.")[0]));
-		revisionAttributes.add(new HTML("<hr />"));
 		
 		TextArea contentTextArea = new TextArea();
 		contentTextArea.setText(jsonRevision.get("content").isString().stringValue());
-		contentTextArea.setReadOnly(true);		
+		contentTextArea.setReadOnly(true);
 		contentTextArea.addStyleName("content");
 		
 		revisionAttributes.add(contentTextArea);
@@ -68,6 +68,8 @@ public class RevisionContentView extends ContentView {
 		}
 		
 		Documents.beginProgress("Loading revision...");
+		
+		revisionAttributes.add(new Label("Loading..."));
 
 		RequestBuilder builder = new RequestBuilder(RequestBuilder.GET, "/v1/documents/" + document.getID() + "/versions/" + revision);
 

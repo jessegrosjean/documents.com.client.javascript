@@ -1,5 +1,14 @@
 package com.hogbaysoftware.documents.client.views.windowcontent;
 
+import com.google.gwt.event.dom.client.ChangeEvent;
+import com.google.gwt.event.dom.client.ChangeHandler;
+import com.google.gwt.event.dom.client.ClickEvent;
+import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.event.dom.client.KeyCodes;
+import com.google.gwt.event.dom.client.KeyDownEvent;
+import com.google.gwt.event.dom.client.KeyDownHandler;
+import com.google.gwt.event.dom.client.KeyUpEvent;
+import com.google.gwt.event.dom.client.KeyUpHandler;
 import com.google.gwt.http.client.Request;
 import com.google.gwt.http.client.RequestBuilder;
 import com.google.gwt.http.client.RequestCallback;
@@ -9,21 +18,18 @@ import com.google.gwt.json.client.JSONException;
 import com.google.gwt.json.client.JSONObject;
 import com.google.gwt.json.client.JSONParser;
 import com.google.gwt.user.client.Window;
-import com.google.gwt.user.client.ui.ChangeListener;
-import com.google.gwt.user.client.ui.ClickListener;
-import com.google.gwt.user.client.ui.KeyboardListener;
 import com.google.gwt.user.client.ui.TextArea;
-import com.google.gwt.user.client.ui.Widget;
 import com.hogbaysoftware.documents.client.Documents;
 import com.hogbaysoftware.documents.client.model.Document;
 
-public class DocumentContentView extends ContentView implements ChangeListener, ClickListener, KeyboardListener {
+public class DocumentContentView extends ContentView implements ChangeHandler, KeyDownHandler, KeyUpHandler, ClickHandler {
 	private TextArea textArea = new TextArea();
 
 	public DocumentContentView() {
 		initWidget(textArea);
-		textArea.addChangeListener(this);
-		textArea.addKeyboardListener(this);
+		textArea.addChangeHandler(this);
+		textArea.addKeyDownHandler(this);
+		textArea.addKeyUpHandler(this);
 	}
 
 	@Override
@@ -34,12 +40,13 @@ public class DocumentContentView extends ContentView implements ChangeListener, 
 
 	// Change Listeners
 	
-	public void onChange(Widget sender) {
+	public void onChange(ChangeEvent event) {
 		commitEdits();
 	}
 	
-	public void onKeyDown(Widget sender, char keyCode, int modifiers) {
-		if (keyCode == KeyboardListener.KEY_TAB) {
+	public void onKeyDown(KeyDownEvent event) {
+		int keyCode = event.getNativeKeyCode();
+		if (keyCode == KeyCodes.KEY_TAB) {
 			textArea.cancelKey();
 			int cursorPos = textArea.getCursorPos();
 			int selectionLength = textArea.getSelectionLength();
@@ -47,18 +54,15 @@ public class DocumentContentView extends ContentView implements ChangeListener, 
 			String newText = text.substring(0, cursorPos) + "\t" + text.substring(cursorPos + selectionLength, text.length());
 			textArea.setText(newText);
 			textArea.setCursorPos(cursorPos + 1);
-		} else if (keyCode == KeyboardListener.KEY_ENTER) {
+		} else if (keyCode == KeyCodes.KEY_ENTER) {
 		}
 	}
-
-	public void onKeyPress(Widget sender, char keyCode, int modifiers) {
-	}
-
-	public void onKeyUp(Widget sender, char keyCode, int modifiers) {
+	
+	public void onKeyUp(KeyUpEvent event) {
 		commitEdits();
 	}
 	
-	public void onClick(Widget sender) {
+	public void onClick(ClickEvent event) {
 		Document document = Documents.getSharedInstance().getDocument();
 		String name = Window.prompt("Rename Document:", document.getDisplayName());
 		if (name != null) {
@@ -99,7 +103,8 @@ public class DocumentContentView extends ContentView implements ChangeListener, 
 			refreshWindowTitlePath();
 		}
 		textArea.setText(document.getContent());
-		textArea.setFocus(true);		
+		textArea.setReadOnly(false);
+		textArea.setFocus(true);	
 	}
 	
 	public Request refreshFromServer() {
@@ -110,6 +115,9 @@ public class DocumentContentView extends ContentView implements ChangeListener, 
 
 		Documents.beginProgress("Loading document...");
 
+		textArea.setText("Loading...");
+		textArea.setReadOnly(true);
+		
 		RequestBuilder builder = new RequestBuilder(RequestBuilder.GET, "/v1/documents/" + document.getID());
 
 		try {

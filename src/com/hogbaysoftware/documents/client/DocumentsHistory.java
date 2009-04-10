@@ -1,18 +1,19 @@
 package com.hogbaysoftware.documents.client;
 
+import com.google.gwt.event.logical.shared.ValueChangeEvent;
+import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.user.client.History;
-import com.google.gwt.user.client.HistoryListener;
 import com.hogbaysoftware.documents.client.model.Document;
 
-public class DocumentsHistory implements HistoryListener {
+public class DocumentsHistory implements ValueChangeHandler<String> {
 		
 	public DocumentsHistory() {
-		History.addHistoryListener(this);
+		History.addValueChangeHandler(this);
 	}
-	
-	public void onHistoryChanged(String historyToken) {
+
+	public void onValueChange(ValueChangeEvent<String> event) {
 		Documents documents = Documents.getSharedInstance();
-		String[] historyTokens = historyToken.split("/");
+		String[] historyTokens = event.getValue().split("/");
 		
 		if (historyTokens[0].equalsIgnoreCase("new") || historyTokens[0].equalsIgnoreCase("")) {
 			documents.newAction();

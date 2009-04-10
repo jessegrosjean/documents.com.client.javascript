@@ -1,20 +1,19 @@
 package com.hogbaysoftware.documents.client.views;
 
-import com.google.gwt.core.client.GWT;
+import com.google.gwt.event.dom.client.ClickEvent;
+import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.History;
-import com.google.gwt.user.client.ui.ClickListener;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.HasHorizontalAlignment;
 import com.google.gwt.user.client.ui.HasVerticalAlignment;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Image;
-import com.google.gwt.user.client.ui.Widget;
 import com.hogbaysoftware.documents.client.Documents;
 import com.hogbaysoftware.documents.client.model.Document;
 
-public class MenuView extends Composite implements ClickListener {
-	public Image logo = new Image(GWT.getModuleBaseURL() + "logo.png");
+public class MenuView extends Composite implements ClickHandler {
+	public Image logo = new Image("logo.png");
 	private MenuItemView newItem = new MenuItemView("New", "new");
 	private MenuItemView openItem = new MenuItemView("Open", "open");
 	private MenuItemView saveItem = new MenuItemView("Save", this);
@@ -30,7 +29,7 @@ public class MenuView extends Composite implements ClickListener {
 				
 		menuPanel.addStyleName("menu");
 		logo.addStyleName("menuItem");
-		logo.addClickListener(this);	
+		logo.addClickHandler(this);	
 
 		menuPanel.add(logo);
 		menuPanel.setCellHorizontalAlignment(logo, HasHorizontalAlignment.ALIGN_CENTER);
@@ -80,15 +79,22 @@ public class MenuView extends Composite implements ClickListener {
 	}
 	
 	public void beginProgress() {
-		logo.setUrl(GWT.getModuleBaseURL() + "loading.gif");
+		logo.setUrl("loading.gif");
 	}
 	
 	public void endProgress() {
-		logo.setUrl(GWT.getModuleBaseURL() + "logo.png");
+		logo.setUrl("logo.png");
 	}
 	
-	public void onClick(Widget sender) {
+	public void onClick(ClickEvent event) {
 		Documents documents = Documents.getSharedInstance();
+		Object sender = event.getSource();
+		
+		if (sender instanceof MenuItemView) {
+			if (!((MenuItemView)sender).getEnabled()) {
+				return;
+			}
+		}
 		
 		if (sender == logo) {
 			documents.goHome();

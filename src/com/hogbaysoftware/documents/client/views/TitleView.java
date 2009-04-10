@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
-import com.google.gwt.user.client.ui.ClickListener;
+import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.HorizontalPanel;
@@ -72,8 +72,8 @@ public class TitleView extends Composite {
 				first = false;
 			}
 			
-			if (pathAction instanceof ClickListener) {
-				titlePanel.add(new MenuItemView(pathComponent, (ClickListener)pathAction));
+			if (pathAction instanceof ClickHandler) {
+				titlePanel.add(new MenuItemView(pathComponent, (ClickHandler)pathAction));
 			} else if (pathAction instanceof String) {
 				titlePanel.add(new MenuItemView(pathComponent, (String)pathAction));
 			} else {

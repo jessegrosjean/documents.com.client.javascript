@@ -28,12 +28,15 @@ public class OpenContentView extends ContentView {
 
 	public Request refreshFromServer() {
 		documentsList.clear();
+		documentsList.add(new Label("Loading..."));
 
 		Document.refreshDocumentsFromServer(new RequestCallback() {
 			public void onError(Request request, Throwable exception) {
 			}
 			
 			public void onResponseReceived(Request request, Response response) {
+				documentsList.clear();
+				
 				ArrayList<Document> documents = Document.getDocuments();
 				if (documents.size() == 0) {
 					documentsList.add(new Label("Your account has no saved documents."));

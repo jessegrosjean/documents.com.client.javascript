@@ -1,6 +1,8 @@
 package com.hogbaysoftware.documents.client.views;
 
 import com.google.gwt.core.client.JsArray;
+import com.google.gwt.event.dom.client.ClickEvent;
+import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.http.client.Request;
 import com.google.gwt.http.client.RequestBuilder;
 import com.google.gwt.http.client.RequestCallback;
@@ -9,7 +11,6 @@ import com.google.gwt.http.client.Response;
 import com.google.gwt.json.client.JSONBoolean;
 import com.google.gwt.json.client.JSONObject;
 import com.google.gwt.user.client.History;
-import com.google.gwt.user.client.ui.ClickListener;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.HasHorizontalAlignment;
@@ -20,7 +21,7 @@ import com.hogbaysoftware.documents.client.Documents;
 import com.hogbaysoftware.documents.client.model.DiffMatchPatch;
 import com.hogbaysoftware.documents.client.model.Patch;
 
-public class ConflictView extends Composite implements ClickListener {
+public class ConflictView extends Composite implements ClickHandler {
 	private VerticalPanel mainPanel = new VerticalPanel();
 	private JSONObject conflict;
 	
@@ -40,6 +41,7 @@ public class ConflictView extends Composite implements ClickListener {
 		panel.add(new HTML("<em>Document:</em> <a href=\"#" + id + "\">" + name + "</a>"));
 		
 		Widget markAsResolved = new MenuItemView("Mark As Resolved", this);
+		markAsResolved.getElement().setAttribute("style", "margin:0;");
 		panel.add(markAsResolved);
 		panel.setCellHorizontalAlignment(markAsResolved, HasHorizontalAlignment.ALIGN_RIGHT);
 		panel.setWidth("100%");
@@ -55,7 +57,7 @@ public class ConflictView extends Composite implements ClickListener {
 		}
 	}
 
-	public void onClick(Widget sender) {
+	public void onClick(ClickEvent event) {
 		Documents.beginProgress("Resolving conflict...");
 
 		JSONObject jsonDocument = new JSONObject();
