@@ -104,7 +104,9 @@ public class DocumentContentView extends ContentView implements ChangeHandler, K
 		}
 		textArea.setText(document.getContent());
 		textArea.setReadOnly(false);
-		textArea.setFocus(true);	
+		textArea.setFocus(true);
+		
+		Documents.getSharedInstance().forceResizeContentContainerView();
 	}
 	
 	public Request refreshFromServer() {

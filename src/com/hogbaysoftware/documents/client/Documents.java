@@ -48,16 +48,22 @@ public class Documents implements EntryPoint, NativePreviewHandler, ResizeHandle
 	private RevisionsContentView revisionsView = new RevisionsContentView();
 	private RevisionContentView revisionView = new RevisionContentView();
 	private ConflictsContentView conflictsView = new ConflictsContentView();
-
+	private boolean isIPhoneHosted;
+	
 	public static Documents getSharedInstance() {
 		return sharedInstance;
 	}
 
+	public boolean isIPhoneHosted() {
+		return isIPhoneHosted;
+	}
+	
 	public void onModuleLoad() {
-		sharedInstance = this;	
-
+		sharedInstance = this;
+		isIPhoneHosted = RootPanel.get("iphone.server") != null;
+		
 		titleView.setWindowTitlePath("Loading...", null);
-
+		
 		RootPanel.get("desktop").getElement().setInnerHTML("");		
 		RootPanel.get("desktop").add(menuView);
 		RootPanel.get("desktop").add(titleView);
@@ -67,8 +73,6 @@ public class Documents implements EntryPoint, NativePreviewHandler, ResizeHandle
 		Window.enableScrolling(false);
 		Documents.registerForOnBeforeUnload(this);
 		Event.addNativePreviewHandler(this);
-
-		//onWindowResized(Window.getClientWidth(), Window.getClientHeight());
 
 		Document.refreshDocumentsFromServer(new RequestCallback() {
 			public void onError(Request request, Throwable exception) {
@@ -371,6 +375,10 @@ public class Documents implements EntryPoint, NativePreviewHandler, ResizeHandle
 		menuView.validateMenuItems();
 	}
 
+	public void forceResizeContentContainerView() {
+		contentContainerView.setHeight((Window.getClientHeight() - (contentContainerView.getAbsoluteTop())) + "px");
+	}
+	
 	private native static String registerForOnBeforeUnload(Documents documents) /*-{
 		$wnd.onbeforeunload = function() {
 			var shouldCancelNavigation = documents.@com.hogbaysoftware.documents.client.Documents::shouldCancelNavigation()();

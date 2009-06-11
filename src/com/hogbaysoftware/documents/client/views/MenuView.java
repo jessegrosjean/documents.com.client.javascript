@@ -39,6 +39,7 @@ public class MenuView extends Composite implements ClickHandler {
 		menuPanel.add(saveItem);
 		menuPanel.add(deleteItem);
 //		mainPanel.add(shareItem);
+		
 		menuPanel.add(revisionsItem);
 		menuPanel.add(conflictsItem);
 
@@ -51,7 +52,15 @@ public class MenuView extends Composite implements ClickHandler {
 	}
 	
 	public void validateMenuItems() {
-		Document document = Documents.getSharedInstance().getDocument();
+		Documents documents = Documents.getSharedInstance();
+
+		if (documents.isIPhoneHosted()) {
+			revisionsItem.setVisible(false);
+			conflictsItem.setVisible(false);
+			signOutItem.setVisible(false);
+		}
+
+		Document document = documents.getDocument();
 		
 		if (document == null) {
 			saveItem.setEnabled(false);
