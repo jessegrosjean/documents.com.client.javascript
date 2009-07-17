@@ -39,7 +39,11 @@ public class OpenContentView extends ContentView {
 				
 				ArrayList<Document> documents = Document.getDocuments();
 				if (documents.size() == 0) {
-					documentsList.add(new Label("Your account has no saved documents."));
+					if (Documents.getSharedInstance().isIPhoneHosted()) {
+						documentsList.add(new Label("Your iPhone has no saved documents."));
+					} else {
+						documentsList.add(new Label("Your account has no saved documents."));
+					}
 				} else {
 					for (Document each : documents) {
 						documentsList.add(new Hyperlink(each.getName(), each.getID()));

@@ -13,7 +13,7 @@ import com.hogbaysoftware.documents.client.Documents;
 import com.hogbaysoftware.documents.client.model.Document;
 
 public class MenuView extends Composite implements ClickHandler {
-	public Image logo = new Image("logo.png");
+	public Image logo = new Image("logo_" + Documents.getSharedInstance().serviceName() + ".png");
 	private MenuItemView newItem = new MenuItemView("New", "new");
 	private MenuItemView openItem = new MenuItemView("Open", "open");
 	private MenuItemView saveItem = new MenuItemView("Save", this);
@@ -55,6 +55,7 @@ public class MenuView extends Composite implements ClickHandler {
 		Documents documents = Documents.getSharedInstance();
 
 		if (documents.isIPhoneHosted()) {
+			logo.setVisible(false);
 			revisionsItem.setVisible(false);
 			conflictsItem.setVisible(false);
 			signOutItem.setVisible(false);
@@ -88,11 +89,11 @@ public class MenuView extends Composite implements ClickHandler {
 	}
 	
 	public void beginProgress() {
-		logo.setUrl("loading.gif");
+		logo.setUrl("loading." + Documents.getSharedInstance().serviceName() + ".gif");
 	}
 	
 	public void endProgress() {
-		logo.setUrl("logo.png");
+		logo.setUrl("logo_" + Documents.getSharedInstance().serviceName() + ".png");
 	}
 	
 	public void onClick(ClickEvent event) {

@@ -40,14 +40,14 @@ public class Documents implements EntryPoint, NativePreviewHandler, ResizeHandle
 	private static ArrayList<String> progressMessageStack = new ArrayList<String>();
 
 	private Document document;
-	private MenuView menuView = new MenuView();
-	private TitleView titleView = new TitleView();
-	private ContentContainerView contentContainerView = new ContentContainerView();
-	private OpenContentView documentsView = new OpenContentView();
-	private DocumentContentView documentView = new DocumentContentView();
-	private RevisionsContentView revisionsView = new RevisionsContentView();
-	private RevisionContentView revisionView = new RevisionContentView();
-	private ConflictsContentView conflictsView = new ConflictsContentView();
+	private MenuView menuView;
+	private TitleView titleView;
+	private ContentContainerView contentContainerView;
+	private OpenContentView documentsView;
+	private DocumentContentView documentView;
+	private RevisionsContentView revisionsView;
+	private RevisionContentView revisionView;
+	private ConflictsContentView conflictsView;
 	private boolean isIPhoneHosted;
 	
 	public static Documents getSharedInstance() {
@@ -58,9 +58,22 @@ public class Documents implements EntryPoint, NativePreviewHandler, ResizeHandle
 		return isIPhoneHosted;
 	}
 	
+	public String serviceName() {
+		return "WriteRoom.ws";
+	}
+	
 	public void onModuleLoad() {
 		sharedInstance = this;
 		isIPhoneHosted = RootPanel.get("iphone.server") != null;
+		
+		menuView = new MenuView();
+		titleView = new TitleView();
+		contentContainerView = new ContentContainerView();
+		documentsView = new OpenContentView();
+		documentView = new DocumentContentView();
+		revisionsView = new RevisionsContentView();
+		revisionView = new RevisionContentView();
+		conflictsView = new ConflictsContentView();
 		
 		titleView.setWindowTitlePath("Loading...", null);
 		
@@ -104,11 +117,14 @@ public class Documents implements EntryPoint, NativePreviewHandler, ResizeHandle
 			boolean shortcut = (ctrl || meta);
 
 			if (shortcut) {
-				if  (getWindowContentView() == documentView && keyCode == 'S') {  // 83 is 's'
+				if  (getWindowContentView() == documentView && keyCode == 'S') {
 					saveAction();
 					event.cancel();
-				} else if  (keyCode == 'O') {  // 79 is 'o'
+				} else if  (keyCode == 'O') {
 					History.newItem("open");
+					event.cancel();
+				} else if  (keyCode == 'N') {
+					History.newItem("new");
 					event.cancel();
 				}
 			}
@@ -234,7 +250,7 @@ public class Documents implements EntryPoint, NativePreviewHandler, ResizeHandle
 							}
 
 							if (jsonResponse.get("conflicts") != null) {
-								if (Window.confirm("Some of your edits conflict with recent changes made on TaskPaper.com. To resolve those conflicts now click the OK button.")) {
+								if (Window.confirm("Some of your edits conflict with recent changes made on " + serviceName() + ". To resolve those conflicts now click the OK button.")) {
 									History.newItem("conflicts");
 								}
 							}
