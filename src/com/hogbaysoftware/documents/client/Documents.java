@@ -258,7 +258,7 @@ public class Documents implements EntryPoint, NativePreviewHandler, ResizeHandle
 							Documents.endProgressWithAlert("Couldn't parse document\n\n" + e);
 						}
 					} else {
-						Documents.endProgressWithAlert("Couldn't save document (" + response.getStatusText() + ")");
+						Documents.endProgressWithAlert("Couldn't save document (" + response.getStatusText() + ")\n" + response.getText());
 					}
 				}
 			});
