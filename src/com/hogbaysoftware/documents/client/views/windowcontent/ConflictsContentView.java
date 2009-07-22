@@ -53,7 +53,7 @@ public class ConflictsContentView extends ContentView {
 
 						if (size > 0) {
 							conflictsList.add(new HTML("<p><strong>Your account has sync conflicts.</strong></p>"));
-							conflictsList.add(new HTML("<ul><li>Green marks text that you added, but that could not be saved.</li><li>Red marks text that you removed, but that could not be deleted.</li><li>Review each conflict, and then mark it as resolved to remove it from this list.</li></ul>"));
+							conflictsList.add(new HTML("<ul><li>Underlines indicate text that you added, but that could not be saved.</li><li>Strikethroughs indicate text that you deleted, but that could not be removed.</li><li>Review each conflict, and then mark it as resolved to remove it from this list.</li></ul>"));
 							
 							for (int i = 0; i < size; i++) {
 								ConflictView conflictView = new ConflictView(jsonConflicts.get(i).isObject());

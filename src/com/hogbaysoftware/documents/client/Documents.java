@@ -48,24 +48,25 @@ public class Documents implements EntryPoint, NativePreviewHandler, ResizeHandle
 	private RevisionsContentView revisionsView;
 	private RevisionContentView revisionView;
 	private ConflictsContentView conflictsView;
+	private String serviceName;
 	private boolean isIPhoneHosted;
 	
 	public static Documents getSharedInstance() {
 		return sharedInstance;
 	}
 
+	public String serviceName() {
+		return serviceName;
+	}
+	
 	public boolean isIPhoneHosted() {
 		return isIPhoneHosted;
 	}
 	
-	public String serviceName() {
-		return "WriteRoom.ws";
-	}
-	
 	public void onModuleLoad() {
 		sharedInstance = this;
+		serviceName = RootPanel.get("service.name").getElement().getInnerText();
 		isIPhoneHosted = RootPanel.get("iphone.server") != null;
-		
 		menuView = new MenuView();
 		titleView = new TitleView();
 		contentContainerView = new ContentContainerView();
