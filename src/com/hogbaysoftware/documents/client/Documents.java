@@ -198,13 +198,13 @@ public class Documents implements EntryPoint, NativePreviewHandler, ResizeHandle
 		if (initialExistsOnServer) {
 			jsonDocument.put("id", new JSONString(document.getID()));
 			jsonDocument.put("version", new JSONNumber(document.getVersion()));
-		} else if (document.getName() == null) {
-			document.setName(document.getDisplayName());
 		}
 
 		Documents.beginProgress("Saving document...");
 
 		getWindowContentView().commitEdits();
+
+		document.setName(document.getDisplayName());
 
 		if (document.getName() != null) jsonDocument.put("name", new JSONString(document.getName()));
 		if (document.getContent() != null) jsonDocument.put("content", new JSONString(document.getContent()));

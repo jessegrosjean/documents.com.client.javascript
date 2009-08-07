@@ -125,13 +125,15 @@ public class Document {
 	public String getDisplayName() {
 		String displayName = name;
 
-		if (name == null || name.length() == 0) {
+		if (name == null || name.length() == 0 || name.equals("Untitled")) {
 			if (content != null) {
 				int index = Math.min(content.indexOf("\n"), 32);
 				if (index > 0) {
 					displayName = content.substring(0, index);
-				} else {
+				} else if (index != 0){
 					displayName = content.substring(0, Math.min(content.length(), 32));
+				} else {
+					displayName = "";
 				}
 				
 				if (displayName.length() == 0) {
