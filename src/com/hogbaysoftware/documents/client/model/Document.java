@@ -22,6 +22,7 @@ public class Document {
 	private int version = -1;
 	private String name;
 	private String content = "";
+	private String shadowContent = "";
 	private boolean hasEdits;
 	private HashMap<String, JSONObject> revisions;
 
@@ -110,7 +111,6 @@ public class Document {
 	public void setVersion(int version) {
 		if (this.version != version) {
 			this.version = version;
-			this.content = null;
 		}
 	}
 
@@ -153,6 +153,14 @@ public class Document {
 		if (this.content != null && content != null && this.content.equals(content)) return false;
 		this.content = content;
 		return true;
+	}
+
+	public String getShadowContent() {
+		return shadowContent;
+	}
+
+	public void setShadowContent(String shadowContent) {
+		this.shadowContent = shadowContent;
 	}
 
 	public boolean existsOnServer() {

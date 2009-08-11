@@ -24,6 +24,7 @@ import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.Event.NativePreviewEvent;
 import com.google.gwt.user.client.Event.NativePreviewHandler;
 import com.google.gwt.user.client.ui.RootPanel;
+import com.hogbaysoftware.documents.client.model.DiffMatchPatch;
 import com.hogbaysoftware.documents.client.model.Document;
 import com.hogbaysoftware.documents.client.views.ContentContainerView;
 import com.hogbaysoftware.documents.client.views.MenuView;
@@ -207,12 +208,14 @@ public class Documents implements EntryPoint, NativePreviewHandler, ResizeHandle
 		document.setName(document.getDisplayName());
 
 		if (document.getName() != null) jsonDocument.put("name", new JSONString(document.getName()));
-		if (document.getContent() != null) jsonDocument.put("content", new JSONString(document.getContent()));
 
 		if (document.existsOnServer()) {
+			DiffMatchPatch dmp = new DiffMatchPatch();
+			jsonDocument.put("patches", new JSONString(dmp.patch_toText(dmp.patch_make(document.getShadowContent(), document.getContent()))));
 			builder = new RequestBuilder(RequestBuilder.POST, "/v1/documents/" + document.getID());
 			builder.setHeader("X-HTTP-Method-Override", "PUT");
 		} else {
+			jsonDocument.put("content", new JSONString(document.getContent()));
 			builder = new RequestBuilder(RequestBuilder.POST, "/v1/documents/");
 		}
 
@@ -240,6 +243,7 @@ public class Documents implements EntryPoint, NativePreviewHandler, ResizeHandle
 								document.setContent(jsonResponse.get("content").isString().stringValue());
 							}
 
+							document.setShadowContent(document.getContent());
 							document.setHasEdits(false);
 
 							Documents.endProgressWithAlert(null);

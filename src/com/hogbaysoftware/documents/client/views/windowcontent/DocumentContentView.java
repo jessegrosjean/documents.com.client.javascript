@@ -136,6 +136,7 @@ public class DocumentContentView extends ContentView implements ChangeHandler, K
 							document.setVersion((int) jsonDocument.get("version").isNumber().doubleValue());
 							document.setName(jsonDocument.get("name").isString().stringValue());
 							document.setContent(jsonDocument.get("content").isString().stringValue());
+							document.setShadowContent(document.getContent());
 							document.setHasEdits(false);
 							refreshFromModel();
 							Documents.endProgressWithAlert(null);
