@@ -32,13 +32,13 @@ public class ConflictView extends Composite implements ClickHandler {
 		
 		conflict = aConflict;
 		String id = conflict.get("id").isString().stringValue();
+		String document_id = conflict.get("document_id").isString().stringValue();
 		String name = conflict.get("name").isString().stringValue();
-		String revision = Integer.toString((int)conflict.get("version").isNumber().doubleValue());
 		
 		DiffMatchPatch dmp = new DiffMatchPatch();
 		
 		HorizontalPanel panel = new HorizontalPanel();
-		panel.add(new HTML("<em>Document:</em> <a href=\"#" + id + "\">" + name + "</a>"));
+		panel.add(new HTML("<em>Document:</em> <a href=\"#" + document_id + "\">" + name + "</a>"));
 		
 		Widget markAsResolved = new MenuItemView("Mark As Resolved", this);
 		markAsResolved.getElement().setAttribute("style", "margin:0;");
@@ -49,7 +49,7 @@ public class ConflictView extends Composite implements ClickHandler {
 		mainPanel.add(panel);
 		mainPanel.setCellWidth(panel, "100%");
 		
-		mainPanel.add(new HTML("<em>Revision:</em> <a href=\"#" + id + "/revisions/" + revision + "\">" + revision + "</a>"));
+		mainPanel.add(new HTML("<em>Revision:</em> <a href=\"#" + document_id + "/revisions/" + id + "\">" + id + "</a>"));
 		
 		JsArray<Patch> failedPatches = dmp.patch_fromText(conflict.get("conflicts").isString().stringValue());
 		for (int i = 0; i < failedPatches.length(); i++) {
@@ -62,7 +62,7 @@ public class ConflictView extends Composite implements ClickHandler {
 
 		JSONObject jsonDocument = new JSONObject();
 		jsonDocument.put("conflicts_resolved", JSONBoolean.getInstance(true));
-		RequestBuilder builder = new RequestBuilder(RequestBuilder.POST, "/v1/documents/" + conflict.get("id").isString().stringValue() + "/edits/" + (int) conflict.get("version").isNumber().doubleValue());
+		RequestBuilder builder = new RequestBuilder(RequestBuilder.POST, "/v1/documents/" + conflict.get("document_id").isString().stringValue() + "/revisions/" + conflict.get("id").isString().stringValue());
 		builder.setHeader("X-HTTP-Method-Override", "PUT");
 
 		try {

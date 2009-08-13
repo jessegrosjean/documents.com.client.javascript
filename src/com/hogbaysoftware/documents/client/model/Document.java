@@ -1,6 +1,7 @@
 package com.hogbaysoftware.documents.client.model;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -15,7 +16,7 @@ import com.google.gwt.json.client.JSONObject;
 import com.google.gwt.json.client.JSONParser;
 import com.hogbaysoftware.documents.client.Documents;
 
-public class Document {
+public class Document implements Comparable<Document> {
 	private static HashMap<String, Document> idsToDocuments = new HashMap<String, Document>();
 
 	private String id;
@@ -31,6 +32,9 @@ public class Document {
 		for (Map.Entry<String, Document> entry : idsToDocuments.entrySet()) {
 			documents.add(entry.getValue());
 		}
+		
+		Collections.sort(documents);
+		
 		return documents;
 	}
 	
@@ -89,7 +93,7 @@ public class Document {
 
 		return null;
 	}
-	
+		
 	public String getID() {
 		return id;
 	}
@@ -145,6 +149,10 @@ public class Document {
 		return displayName;
 	}
 
+	public int compareTo(Document o) {
+		return getDisplayName().compareToIgnoreCase(o.getDisplayName());
+	}
+	
 	public String getContent() {
 		return content;
 	}

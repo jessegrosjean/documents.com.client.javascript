@@ -47,6 +47,9 @@ public class ConflictsContentView extends ContentView {
 				public void onResponseReceived(Request request, Response response) {
 					conflictsList.clear();
 					
+					conflictsList.add(new HTML("<p><strong>I just changed the way that document conflicts are stored and created. This should fix a number of sync errors that were occurring.</strong></p>"));
+					conflictsList.add(new HTML("<ul><li>I will keep an old <a href=\"http://1.latest.hogbaywriteroom.appspot.com/\">version of the site available</a> for 1 week. You can access your old unresolved conflicts there during that time.</li></ul>"));
+					
 					if (200 == response.getStatusCode()) {
 						JSONArray jsonConflicts = JSONParser.parse(response.getText()).isArray();
 						int size = jsonConflicts.size();

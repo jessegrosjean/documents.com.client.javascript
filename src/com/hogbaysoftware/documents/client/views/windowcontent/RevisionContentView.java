@@ -8,6 +8,7 @@ import com.google.gwt.http.client.Response;
 import com.google.gwt.json.client.JSONException;
 import com.google.gwt.json.client.JSONObject;
 import com.google.gwt.json.client.JSONParser;
+import com.google.gwt.json.client.JSONValue;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.TextArea;
@@ -39,12 +40,15 @@ public class RevisionContentView extends ContentView {
 	public void refreshFromJSONRevision(JSONObject jsonRevision) {
 		revisionAttributes.clear();
 
-		revisionAttributes.add(new HTML("<em>Revision:</em> " + revision));
-		revisionAttributes.add(new HTML("<em>Name:</em> " + jsonRevision.get("name").isString().stringValue()));
-		revisionAttributes.add(new HTML("<em>Date:</em> " + jsonRevision.get("created").isString().stringValue().split("\\.")[0]));
+		revisionAttributes.add(new HTML("<p><strong>" + jsonRevision.get("name").isString().stringValue() + "</strong></p>"));
 		
 		TextArea contentTextArea = new TextArea();
-		contentTextArea.setText(jsonRevision.get("content").isString().stringValue());
+		JSONValue contentValue = jsonRevision.get("content");
+		if (contentValue.isNull() != null) {
+			contentTextArea.setText("");
+		} else {
+			contentTextArea.setText(contentValue.isString().stringValue());
+		}
 		contentTextArea.setReadOnly(true);
 		contentTextArea.addStyleName("content");
 		
@@ -71,7 +75,7 @@ public class RevisionContentView extends ContentView {
 		
 		revisionAttributes.add(new Label("Loading..."));
 
-		RequestBuilder builder = new RequestBuilder(RequestBuilder.GET, "/v1/documents/" + document.getID() + "/versions/" + revision);
+		RequestBuilder builder = new RequestBuilder(RequestBuilder.GET, "/v1/documents/" + document.getID() + "/revisions/" + revision);
 
 		try {
 			return builder.sendRequest(null, new RequestCallback() {
