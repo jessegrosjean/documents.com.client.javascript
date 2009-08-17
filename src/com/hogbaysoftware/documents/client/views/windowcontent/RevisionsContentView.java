@@ -7,7 +7,6 @@ import com.google.gwt.http.client.RequestException;
 import com.google.gwt.http.client.Response;
 import com.google.gwt.json.client.JSONArray;
 import com.google.gwt.json.client.JSONParser;
-import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.Hyperlink;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.ScrollPanel;
@@ -52,10 +51,6 @@ public class RevisionsContentView extends ContentView {
 
 				public void onResponseReceived(Request request, Response response) {
 					revisionsList.clear();
-				
-					revisionsList.add(new HTML("<p><strong>I just changed the way that document revisions are stored and created. This should fix a number of sync errors that were occurring.</strong></p>"));
-					revisionsList.add(new HTML("<ul><li>I will keep an old <a href=\"http://1.latest.hogbaywriteroom.appspot.com/\">version of the site available</a> for 1 week. You can access your old revisions there during that time.</li><li>The new revision system is creating a new revision on every save, but in the future this is likely to change. For example a new revision might not be created if you only add (and don&#8217;t delete) text.</li><li>The new revision system is keeping all revisions, but this is also likely to change. Over time, to save disk space, old revisions may be pruned (deleted). Old revisions with few changes are the most likely to get pruned.</li></ul>"));
-					revisionsList.add(new HTML("<p><strong>New Revisions:</strong></p>"));
 
 					if (200 == response.getStatusCode()) {
 						JSONArray jsonRevisions = JSONParser.parse(response.getText()).isArray();
