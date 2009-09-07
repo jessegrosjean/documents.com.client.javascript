@@ -13,7 +13,7 @@ import com.hogbaysoftware.documents.client.Documents;
 import com.hogbaysoftware.documents.client.model.Document;
 
 public class MenuView extends Composite implements ClickHandler {
-	public Image logo = new Image("logo_" + Documents.getSharedInstance().serviceName() + ".png");
+	public Image logo = new Image("logo.png");
 	private MenuItemView newItem = new MenuItemView("New", "new");
 	private MenuItemView openItem = new MenuItemView("Open", "open");
 	private MenuItemView saveItem = new MenuItemView("Save", this);
@@ -89,11 +89,11 @@ public class MenuView extends Composite implements ClickHandler {
 	}
 	
 	public void beginProgress() {
-		logo.setUrl("loading." + Documents.getSharedInstance().serviceName() + ".gif");
+		logo.setUrl("loading.gif");
 	}
 	
 	public void endProgress() {
-		logo.setUrl("logo_" + Documents.getSharedInstance().serviceName() + ".png");
+		logo.setUrl("logo.png");
 	}
 	
 	public void onClick(ClickEvent event) {

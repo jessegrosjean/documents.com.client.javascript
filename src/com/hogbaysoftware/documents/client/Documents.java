@@ -49,15 +49,10 @@ public class Documents implements EntryPoint, NativePreviewHandler, ResizeHandle
 	private RevisionsContentView revisionsView;
 	private RevisionContentView revisionView;
 	private ConflictsContentView conflictsView;
-	private String serviceName;
 	private boolean isIPhoneHosted;
 	
 	public static Documents getSharedInstance() {
 		return sharedInstance;
-	}
-
-	public String serviceName() {
-		return serviceName;
 	}
 	
 	public boolean isIPhoneHosted() {
@@ -66,7 +61,6 @@ public class Documents implements EntryPoint, NativePreviewHandler, ResizeHandle
 	
 	public void onModuleLoad() {
 		sharedInstance = this;
-		serviceName = RootPanel.get("service.name").getElement().getInnerText();
 		isIPhoneHosted = RootPanel.get("iphone.server") != null;
 		menuView = new MenuView();
 		titleView = new TitleView();
@@ -255,7 +249,7 @@ public class Documents implements EntryPoint, NativePreviewHandler, ResizeHandle
 							}
 
 							if (jsonResponse.get("conflicts") != null) {
-								if (Window.confirm("Some of your edits conflict with recent changes made on " + serviceName() + ". To resolve those conflicts now click the OK button.")) {
+								if (Window.confirm("Some of your edits conflict with recent changes made on SimpleText.ws. To resolve those conflicts now click the OK button.")) {
 									History.newItem("conflicts");
 								}
 							}
@@ -283,11 +277,15 @@ public class Documents implements EntryPoint, NativePreviewHandler, ResizeHandle
 		}
 
 		Documents.beginProgress("Deleting document...");
-		RequestBuilder builder = new RequestBuilder(RequestBuilder.POST, "/v1/documents/" + document.getID() + "?version=" + document.getVersion());
+
+		RequestBuilder builder = new RequestBuilder(RequestBuilder.POST, "/v1/documents/" + document.getID());
 		builder.setHeader("X-HTTP-Method-Override", "DELETE");
 
 		try {
-			return builder.sendRequest("", new RequestCallback() {
+			JSONObject jsonDictionary = new JSONObject();
+			jsonDictionary.put("version", new JSONNumber(document.getVersion()));
+			
+			return builder.sendRequest(jsonDictionary.toString(), new RequestCallback() {
 				public void onError(Request request, Throwable e) {
 					Documents.endProgressWithAlert("Couldn't delete document\n\n" + e);
 				}
