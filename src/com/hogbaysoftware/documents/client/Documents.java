@@ -278,14 +278,11 @@ public class Documents implements EntryPoint, NativePreviewHandler, ResizeHandle
 
 		Documents.beginProgress("Deleting document...");
 
-		RequestBuilder builder = new RequestBuilder(RequestBuilder.POST, "/v1/documents/" + document.getID());
+		RequestBuilder builder = new RequestBuilder(RequestBuilder.POST, "/v1/documents/" + document.getID() + "?version=" + document.getVersion());
 		builder.setHeader("X-HTTP-Method-Override", "DELETE");
 
-		try {
-			JSONObject jsonDictionary = new JSONObject();
-			jsonDictionary.put("version", new JSONNumber(document.getVersion()));
-			
-			return builder.sendRequest(jsonDictionary.toString(), new RequestCallback() {
+		try {			
+			return builder.sendRequest("", new RequestCallback() {
 				public void onError(Request request, Throwable e) {
 					Documents.endProgressWithAlert("Couldn't delete document\n\n" + e);
 				}
