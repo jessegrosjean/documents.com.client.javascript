@@ -129,7 +129,7 @@ public class Document implements Comparable<Document> {
 	public String getDisplayName() {
 		String displayName = name;
 
-		if (name == null || name.length() == 0 || name.equals("Untitled")) {
+		if (name == null || name.length() == 0 || name.equals("Untitled.txt")) {
 			if (content != null) {
 				int index = Math.min(content.indexOf("\n"), 32);
 				if (index > 0) {
@@ -139,9 +139,15 @@ public class Document implements Comparable<Document> {
 				} else {
 					displayName = "";
 				}
-				
-				if (displayName.length() == 0) {
-					displayName = "Untitled";
+			}
+			
+			if (displayName == null || displayName.length() == 0) {
+				displayName = "Untitled.txt";
+			} else if (!displayName.endsWith(".txt")) {
+				if (displayName.endsWith(".")) {
+					displayName = displayName + "txt";
+				} else {
+					displayName = displayName + ".txt";
 				}
 			}
 		}
